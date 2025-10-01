@@ -58,10 +58,12 @@ export function PropertyCategories() {
   return (
     <section className="container py-12 md:py-20">
       <h2 className="text-3xl md:text-4xl font-bold text-center mb-10">Explore by Property Type</h2>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-        {categories.map((category, index) => (
-          <CategoryCard key={index} {...category} />
-        ))}
+      <div className="flex justify-center"> {/* Added flex container for centering */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl"> {/* Removed mx-auto */}
+          {categories.map((category, index) => (
+            <CategoryCard key={index} {...category} />
+          ))}
+        </div>
       </div>
     </section>
   );

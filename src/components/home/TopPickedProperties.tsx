@@ -52,10 +52,12 @@ export function TopPickedProperties() {
   return (
     <section className="container py-12 md:py-20">
       <h2 className="text-3xl md:text-4xl font-bold text-center mb-10">Top Picked Properties in Kerala</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl mx-auto"> {/* Changed to lg:grid-cols-5 */}
-        {properties.map((property, index) => (
-          <PropertyCard key={index} {...property} />
-        ))}
+      <div className="flex justify-center"> {/* Added flex container for centering */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl"> {/* Removed mx-auto */}
+          {properties.map((property, index) => (
+            <PropertyCard key={index} {...property} />
+          ))}
+        </div>
       </div>
     </section>
   );
