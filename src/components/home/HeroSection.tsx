@@ -23,7 +23,7 @@ export function HeroSection() {
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
   const [budget, setBudget] = useState<string>(''); // New state for Budget
-  const [possessionStatus, setPossessionStatus] = useState<string>(''); // New state for Possession Status
+  // Removed possessionStatus state
 
   const handleSearch = () => {
     console.log({
@@ -32,7 +32,7 @@ export function HeroSection() {
       selectedDistrict,
       searchQuery,
       budget,
-      possessionStatus,
+      // Removed possessionStatus from log
     });
     // Implement actual search logic here later
   };
@@ -48,7 +48,7 @@ export function HeroSection() {
             Explore properties for sale and rent across all districts of Kerala.
           </p>
 
-          <div className="bg-background p-6 rounded-lg shadow-lg max-w-4xl w-full mx-auto"> {/* Adjusted width and centering */}
+          <div className="bg-background p-6 rounded-lg shadow-lg max-w-4xl w-full mx-auto">
             {/* Transaction Type Toggles (Buy/Rent) */}
             <div className="flex justify-center mb-6">
               <ToggleGroup
@@ -57,10 +57,10 @@ export function HeroSection() {
                 onValueChange={(value: TransactionType) => value && setTransactionType(value)}
                 className="grid grid-cols-2 w-full"
               >
-                <ToggleGroupItem value="buy" aria-label="Toggle Buy" className="w-full">
+                <ToggleGroupItem value="buy" aria-label="Toggle Buy" className="w-full border"> {/* Added border */}
                   Buy
                 </ToggleGroupItem>
-                <ToggleGroupItem value="rent" aria-label="Toggle Rent" className="w-full">
+                <ToggleGroupItem value="rent" aria-label="Toggle Rent" className="w-full border"> {/* Added border */}
                   Rent
                 </ToggleGroupItem>
               </ToggleGroup>
@@ -84,10 +84,10 @@ export function HeroSection() {
 
               {/* Search Input with Location and Voice Icons */}
               <SearchInputWithIcons
-                placeholder="Search by Project, Locality, or Builder" // Updated placeholder to match image
+                placeholder="Search by Project, Locality, or Builder"
                 value={searchQuery}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                className="md:col-span-3" // Spans 3 columns on medium screens and up
+                className="md:col-span-3"
                 onLocationClick={() => console.log('Location icon clicked')}
                 onVoiceSearchClick={() => console.log('Voice icon clicked')}
               />
@@ -106,7 +106,7 @@ export function HeroSection() {
                 </SelectContent>
               </Select>
 
-              {/* Property Type Selector (now a Select component) */}
+              {/* Property Type Selector */}
               <Select onValueChange={(value: PropertyType) => setPropertyType(value)} value={propertyType}>
                 <SelectTrigger className="w-full">
                   <SelectValue placeholder="Property Type" />
@@ -119,21 +119,10 @@ export function HeroSection() {
                 </SelectContent>
               </Select>
 
-              {/* Possession Status Selector */}
-              <Select onValueChange={setPossessionStatus} value={possessionStatus}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Possession Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ready">Ready to Move</SelectItem>
-                  <SelectItem value="under-construction">Under Construction</SelectItem>
-                  <SelectItem value="new-launch">New Launch</SelectItem>
-                  {/* Add more possession status options */}
-                </SelectContent>
-              </Select>
+              {/* Removed Possession Status Selector */}
 
               {/* Search Button */}
-              <Button onClick={handleSearch} className="w-full md:col-span-1"> {/* Ensure it takes 1 column */}
+              <Button onClick={handleSearch} className="w-full md:col-span-1">
                 <Search className="mr-2 h-4 w-4" /> Search
               </Button>
             </div>
