@@ -69,34 +69,35 @@ export function TopPickedProperties() {
   const propertiesToShow = allProperties.slice(0, 5); // Limit to the first 5 properties
 
   return (
-    <section className="container py-12 md:py-20">
-      <Card className="p-6 md:p-8 shadow-lg max-w-6xl mx-auto">
-        <CardHeader className="px-0 pt-0 pb-4 text-center md:text-left">
-          <CardTitle className="text-3xl md:text-4xl font-bold mb-2">Top Picked Properties in Kerala</CardTitle>
-          <CardDescription className="text-lg text-muted-foreground max-w-3xl mx-auto md:mx-0">
-            A handpicked collection of the most in-demand residential developments. These properties offer unmatched value with ideal locations, smart amenities, and trusted builders.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Carousel
-            opts={{
-              align: "start",
-            }}
-            className="w-full" // Removed px-8
-          >
-            <CarouselContent className="-ml-4 px-6 md:px-8"> {/* Added px-6 md:px-8 here */}
-              {propertiesToShow.map((property, index) => (
-                <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/5">
-                  <PropertyCard {...property} index={index + 1} />
-                </CarouselItem>
-              ))}
-            </CarouselContent>
-            {/* Buttons are now at the very edge of the Carousel, which aligns with CardContent's padding */}
-            <CarouselPrevious className="left-0" />
-            <CarouselNext className="right-0" />
-          </Carousel>
-        </CardContent>
-      </Card>
+    <section className="py-12 md:py-20 w-full"> {/* Removed 'container' from section */}
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8"> {/* New wrapper div for centering content */}
+        <Card className="p-6 md:p-8 shadow-lg max-w-6xl mx-auto"> {/* Card is now explicitly centered within the new container div */}
+          <CardHeader className="px-0 pt-0 pb-4 text-center md:text-left">
+            <CardTitle className="text-3xl md:text-4xl font-bold mb-2">Top Picked Properties in Kerala</CardTitle>
+            <CardDescription className="text-lg text-muted-foreground max-w-3xl mx-auto md:mx-0">
+              A handpicked collection of the most in-demand residential developments. These properties offer unmatched value with ideal locations, smart amenities, and trusted builders.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Carousel
+              opts={{
+                align: "start",
+              }}
+              className="w-full"
+            >
+              <CarouselContent className="-ml-4 px-6 md:px-8">
+                {propertiesToShow.map((property, index) => (
+                  <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/5">
+                    <PropertyCard {...property} index={index + 1} />
+                  </CarouselItem>
+                ))}
+              </CarouselContent>
+              <CarouselPrevious className="left-0" />
+              <CarouselNext className="right-0" />
+            </Carousel>
+          </CardContent>
+        </Card>
+      </div>
     </section>
   );
 }
