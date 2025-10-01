@@ -36,7 +36,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative w-full py-12 md:py-24 lg:py-32 bg-gradient-to-r from-primary to-blue-600 text-primary-foreground">
+    <section className="relative w-full min-h-[calc(100vh-56px)] flex items-center justify-center bg-gradient-to-r from-primary to-blue-600 text-primary-foreground">
       <div className="container px-4 md:px-6 text-center">
         <div className="max-w-3xl mx-auto space-y-6">
           <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
@@ -46,7 +46,7 @@ export function HeroSection() {
             Explore properties for sale and rent across all districts of Kerala.
           </p>
 
-          <div className="bg-background p-6 rounded-lg shadow-lg max-w-4xl w-full mx-auto">
+          <div className="bg-background p-6 rounded-lg shadow-lg max-w-4xl w-full mx-auto mt-8"> {/* Added mt-8 for spacing */}
             {/* Transaction Type Toggles (Buy/Rent) */}
             <div className="flex justify-center mb-6">
               <ToggleGroup
