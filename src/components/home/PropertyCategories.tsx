@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Home, Building, LandPlot } from 'lucide-react';
 
 interface CategoryCardProps {
@@ -57,14 +57,21 @@ export function PropertyCategories() {
 
   return (
     <section className="container py-12 md:py-20">
-      <h2 className="text-3xl md:text-4xl font-bold text-center mb-10">Explore by Property Type</h2>
-      <div className="flex justify-center"> {/* Added flex container for centering */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl"> {/* Removed mx-auto */}
-          {categories.map((category, index) => (
-            <CategoryCard key={index} {...category} />
-          ))}
-        </div>
-      </div>
+      <Card className="p-6 md:p-8 shadow-lg">
+        <CardHeader className="px-0 pt-0 pb-4 text-center md:text-left">
+          <CardTitle className="text-3xl md:text-4xl font-bold mb-2">Explore by Property Type</CardTitle>
+          <CardDescription className="text-lg text-muted-foreground max-w-3xl mx-auto md:mx-0">
+            Discover various property types available, from modern apartments to spacious lands, tailored to your needs.
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="px-0">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
+            {categories.map((category, index) => (
+              <CategoryCard key={index} {...category} />
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </section>
   );
 }

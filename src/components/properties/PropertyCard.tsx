@@ -6,16 +6,17 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-export interface PropertyCardProps { // Added 'export' here
+export interface PropertyCardProps {
   imageSrc: string;
   title: string;
   location: string;
   price: string;
   type: string; // e.g., "Apartment", "House", "Land"
   transactionType: 'For Sale' | 'For Rent';
+  index?: number; // Optional index for the overlay
 }
 
-export function PropertyCard({ imageSrc, title, location, price, type, transactionType }: PropertyCardProps) {
+export function PropertyCard({ imageSrc, title, location, price, type, transactionType, index }: PropertyCardProps) {
   return (
     <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
       <div className="relative h-48 w-full">
@@ -26,10 +27,15 @@ export function PropertyCard({ imageSrc, title, location, price, type, transacti
           objectFit="cover"
           className="rounded-t-lg"
         />
-        <div className="absolute top-2 left-2 bg-primary text-primary-foreground px-3 py-1 rounded-md text-xs font-semibold">
+        {index !== undefined && (
+          <div className="absolute top-2 left-2 text-5xl font-extrabold text-white/70 drop-shadow-lg">
+            {index}
+          </div>
+        )}
+        <div className="absolute top-2 right-2 bg-primary text-primary-foreground px-3 py-1 rounded-md text-xs font-semibold">
           {transactionType}
         </div>
-        <div className="absolute top-2 right-2 bg-secondary text-secondary-foreground px-3 py-1 rounded-md text-xs font-semibold">
+        <div className="absolute bottom-2 left-2 bg-secondary text-secondary-foreground px-3 py-1 rounded-md text-xs font-semibold">
           {type}
         </div>
       </div>
@@ -40,7 +46,7 @@ export function PropertyCard({ imageSrc, title, location, price, type, transacti
         </CardDescription>
       </CardHeader>
       <CardContent className="pb-4">
-        <p className="text-xl font-bold text-primary">{price}</p>
+        <p className="text-xl font-bold text-price-accent">{price}</p> {/* Using new price-accent color */}
       </CardContent>
       <CardFooter>
         <Button className="w-full">View Details</Button>
