@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 export function TopPickedProperties() {
-  const properties: PropertyCardProps[] = [
+  const allProperties: PropertyCardProps[] = [
     {
       imageSrc: "/images/property-1.jpg",
       title: "Luxury Villa in Kochi",
@@ -66,6 +66,8 @@ export function TopPickedProperties() {
     },
   ];
 
+  const propertiesToShow = allProperties.slice(0, 5); // Limit to the first 5 properties
+
   return (
     <section className="container py-12 md:py-20">
       <Card className="p-6 md:p-8 shadow-lg max-w-6xl mx-auto">
@@ -75,22 +77,22 @@ export function TopPickedProperties() {
             A handpicked collection of the most in-demand residential developments. These properties offer unmatched value with ideal locations, smart amenities, and trusted builders.
           </CardDescription>
         </CardHeader>
-        <CardContent> {/* Removed px-0 */}
+        <CardContent>
           <Carousel
             opts={{
               align: "start",
             }}
-            className="w-full px-8" // Added px-8 for internal padding
+            className="w-full px-8"
           >
             <CarouselContent className="-ml-4">
-              {properties.map((property, index) => (
+              {propertiesToShow.map((property, index) => (
                 <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                   <PropertyCard {...property} index={index + 1} />
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="left-4" /> {/* Adjusted button position */}
-            <CarouselNext className="right-4" /> {/* Adjusted button position */}
+            <CarouselPrevious className="left-4" />
+            <CarouselNext className="right-4" />
           </Carousel>
         </CardContent>
       </Card>
