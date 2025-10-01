@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
+import { SubmitPropertyButton } from '@/components/SubmitPropertyButton'; // Import the new component
 
 export function Header() {
   return (
@@ -18,9 +19,7 @@ export function Header() {
         <div className="flex-1 flex items-center justify-end space-x-4">
           {/* Desktop Navigation/Buttons */}
           <nav className="hidden md:flex items-center space-x-4">
-            <Button variant="ghost" asChild>
-              <Link href="/submit-property">Submit Property for Free</Link>
-            </Button>
+            <SubmitPropertyButton /> {/* Using the new component */}
             <Button asChild>
               <Link href="/login">Login</Link>
             </Button>
@@ -36,9 +35,7 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="right">
               <div className="flex flex-col gap-4 p-4">
-                <Button variant="ghost" asChild className="w-full">
-                  <Link href="/submit-property">Submit Property for Free</Link>
-                </Button>
+                <SubmitPropertyButton /> {/* Using the new component */}
                 <Button asChild className="w-full">
                   <Link href="/login">Login</Link>
                 </Button>
