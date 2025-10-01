@@ -9,7 +9,6 @@ import { cn } from '@/lib/utils';
 import { SearchInputWithIcons } from './SearchInputWithIcons';
 
 type TransactionType = 'buy' | 'rent';
-type PropertyType = 'land/plot' | 'house' | 'apartments' | 'commercial';
 
 const KERALA_DISTRICTS = [
   "Alappuzha", "Ernakulam", "Idukku", "Kannur", "Kasaragod", "Kollam",
@@ -19,18 +18,16 @@ const KERALA_DISTRICTS = [
 
 export function HeroSection() {
   const [transactionType, setTransactionType] = useState<TransactionType>('buy');
-  const [propertyType, setPropertyType] = useState<PropertyType>('house');
+  // Removed propertyType state
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [budget, setBudget] = useState<string>('');
+  // Removed budget state
 
   const handleSearch = () => {
     console.log({
       transactionType,
-      propertyType,
       selectedDistrict,
       searchQuery,
-      budget,
     });
     // Implement actual search logic here later
   };
@@ -46,7 +43,7 @@ export function HeroSection() {
             Explore properties for sale and rent across all districts of Kerala.
           </p>
 
-          <div className="bg-background p-6 rounded-lg shadow-lg max-w-4xl w-full mx-auto mt-8"> {/* Added mt-8 for spacing */}
+          <div className="bg-background p-6 rounded-lg shadow-lg max-w-4xl w-full mx-auto mt-8">
             {/* Transaction Type Toggles (Buy/Rent) */}
             <div className="flex justify-center mb-6">
               <ToggleGroup
@@ -60,8 +57,8 @@ export function HeroSection() {
                   aria-label="Toggle Buy"
                   className={cn(
                     "w-full border",
-                    "bg-background text-muted-foreground", // Default state
-                    "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground" // Selected state
+                    "bg-background text-muted-foreground",
+                    "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                   )}
                 >
                   Buy
@@ -71,8 +68,8 @@ export function HeroSection() {
                   aria-label="Toggle Rent"
                   className={cn(
                     "w-full border",
-                    "bg-background text-muted-foreground", // Default state
-                    "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground" // Selected state
+                    "bg-background text-muted-foreground",
+                    "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                   )}
                 >
                   Rent
@@ -101,37 +98,10 @@ export function HeroSection() {
                 placeholder="Search by Project, Locality, or Builder"
                 value={searchQuery}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
-                className="md:col-span-3"
+                className="md:col-span-2"
                 onLocationClick={() => console.log('Location icon clicked')}
                 onVoiceSearchClick={() => console.log('Voice icon clicked')}
               />
-
-              {/* Budget Selector */}
-              <Select onValueChange={setBudget} value={budget}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Budget" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="any">Any Budget</SelectItem>
-                  <SelectItem value="50l">Up to 50 Lakhs</SelectItem>
-                  <SelectItem value="1cr">Up to 1 Crore</SelectItem>
-                  <SelectItem value="2cr">Up to 2 Crores</SelectItem>
-                  {/* Add more budget options as needed */}
-                </SelectContent>
-              </Select>
-
-              {/* Property Type Selector */}
-              <Select onValueChange={(value: PropertyType) => setPropertyType(value)} value={propertyType}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Property Type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="land/plot">Land/Plot</SelectItem>
-                  <SelectItem value="house">House</SelectItem>
-                  <SelectItem value="apartments">Apartments</SelectItem>
-                  <SelectItem value="commercial">Commercial</SelectItem>
-                </SelectContent>
-              </Select>
 
               {/* Search Button */}
               <Button onClick={handleSearch} className="w-full md:col-span-1">
