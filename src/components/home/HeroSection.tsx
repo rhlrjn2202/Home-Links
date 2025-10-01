@@ -2,11 +2,11 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { SearchInputWithIcons } from './SearchInputWithIcons'; // Import the new component
 
 type TransactionType = 'buy' | 'rent';
 type PropertyType = 'land/plot' | 'house' | 'apartments' | 'commercial';
@@ -19,9 +19,11 @@ const KERALA_DISTRICTS = [
 
 export function HeroSection() {
   const [transactionType, setTransactionType] = useState<TransactionType>('buy');
-  const [propertyType, setPropertyType] = useState<PropertyType>('house');
+  const [propertyType, setPropertyType] = useState<PropertyType>('house'); // Now controlled by Select
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const [budget, setBudget] = useState<string>(''); // New state for Budget
+  const [possessionStatus, setPossessionStatus] = useState<string>(''); // New state for Possession Status
 
   const handleSearch = () => {
     console.log({
@@ -29,6 +31,8 @@ export function HeroSection() {
       propertyType,
       selectedDistrict,
       searchQuery,
+      budget,
+      possessionStatus,
     });
     // Implement actual search logic here later
   };
@@ -44,7 +48,8 @@ export function HeroSection() {
             Explore properties for sale and rent across all districts of Kerala.
           </p>
 
-          <div className="bg-background p-6 rounded-lg shadow-lg max-w-2xl mx-auto">
+          <div className="bg-background p-6 rounded-lg shadow-lg w-full mx-auto"> {/* Removed max-w-2xl */}
+            {/* Transaction Type Toggles (Buy/Rent) - kept as per original design, similar to reference image's top row */}
             <div className="flex justify-center mb-6">
               <ToggleGroup
                 type="single"
@@ -61,31 +66,11 @@ export function HeroSection() {
               </ToggleGroup>
             </div>
 
-            <div className="flex justify-center mb-6">
-              <ToggleGroup
-                type="single"
-                value={propertyType}
-                onValueChange={(value: PropertyType) => value && setPropertyType(value)}
-                className="grid grid-cols-2 sm:grid-cols-4 gap-2 w-full"
-              >
-                <ToggleGroupItem value="land/plot" aria-label="Toggle Land/Plot" className="w-full">
-                  Land/Plot
-                </ToggleGroupItem>
-                <ToggleGroupItem value="house" aria-label="Toggle House" className="w-full">
-                  House
-                </ToggleGroupItem>
-                <ToggleGroupItem value="apartments" aria-label="Toggle Apartments" className="w-full">
-                  Apartments
-                </ToggleGroupItem>
-                <ToggleGroupItem value="commercial" aria-label="Toggle Commercial" className="w-full">
-                  Commercial
-                </ToggleGroupItem>
-              </ToggleGroup>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+            {/* Main Search Form Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+              {/* District Selector */}
               <Select onValueChange={setSelectedDistrict} value={selectedDistrict}>
-                <SelectTrigger className="w-full sm:w-1/2">
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select District" />
                 </SelectTrigger>
                 <SelectContent>
@@ -96,18 +81,62 @@ export function HeroSection() {
                   ))}
                 </SelectContent>
               </Select>
-              <Input
-                type="text"
-                placeholder="Search by location, area, etc."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full sm:w-1/2"
-              />
-            </div>
 
-            <Button onClick={handleSearch} className="w-full">
-              <Search className="mr-2 h-4 w-4" /> Search
-            </Button>
+              {/* Search Input with Location and Voice Icons */}
+              <SearchInputWithIcons
+                placeholder="Search by Project, Locality, or Builder" // Updated placeholder to match image
+                value={searchQuery}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
+                className="md:col-span-3" // Spans 3 columns on medium screens and up
+                onLocationClick={() => console.log('Location icon clicked')}
+                onVoiceSearchClick={() => console.log('Voice icon clicked')}
+              />
+
+              {/* Budget Selector */}
+              <Select onValueChange={setBudget} value={budget}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Budget" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="any">Any Budget</SelectItem>
+                  <SelectItem value="50l">Up to 50 Lakhs</SelectItem>
+                  <SelectItem value="1cr">Up to 1 Crore</SelectItem>
+                  <SelectItem value="2cr">Up to 2 Crores</SelectItem>
+                  {/* Add more budget options as needed */}
+                </SelectContent>
+              </Select>
+
+              {/* Property Type Selector (now a Select component) */}
+              <Select onValueChange={(value: PropertyType) => setPropertyType(value)} value={propertyType}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Property Type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="land/plot">Land/Plot</SelectItem>
+                  <SelectItem value="house">House</SelectItem>
+                  <SelectItem value="apartments">Apartments</SelectItem>
+                  <SelectItem value="commercial">Commercial</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {/* Possession Status Selector */}
+              <Select onValueChange={setPossessionStatus} value={possessionStatus}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Possession Status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ready">Ready to Move</SelectItem>
+                  <SelectItem value="under-construction">Under Construction</SelectItem>
+                  <SelectItem value="new-launch">New Launch</SelectItem>
+                  {/* Add more possession status options */}
+                </SelectContent>
+              </Select>
+
+              {/* Search Button */}
+              <Button onClick={handleSearch} className="w-full md:col-span-1"> {/* Ensure it takes 1 column */}
+                <Search className="mr-2 h-4 w-4" /> Search
+              </Button>
+            </div>
           </div>
         </div>
       </div>
