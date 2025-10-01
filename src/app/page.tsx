@@ -1,8 +1,8 @@
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
 import { HeroSection } from "@/components/home/HeroSection";
-import { TopPickedProperties } from "@/components/home/TopPickedProperties"; // Import new section
-import { PropertyCategories } from "@/components/home/PropertyCategories"; // Import new section
+import { TopPickedProperties } from "@/components/home/TopPickedProperties";
+import { PropertyCategories } from "@/components/home/PropertyCategories";
 
 export default function Home() {
   return (
@@ -10,8 +10,8 @@ export default function Home() {
       <Header />
       <main className="flex-1">
         <HeroSection />
-        <TopPickedProperties /> {/* Add Top Picked Properties section */}
-        <PropertyCategories /> {/* Add Property Categories section */}
+        <TopPickedProperties />
+        <PropertyCategories />
         {/* Additional content sections can be added here */}
       </main>
       <Footer />

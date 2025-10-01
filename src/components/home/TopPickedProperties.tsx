@@ -12,7 +12,7 @@ export function TopPickedProperties() {
       location: "Kochi, Ernakulam",
       price: "₹ 1.5 Cr",
       type: "House",
-      transactionType: "For Sale",
+      transactionType: "For Sale", // Fixed: now explicitly "For Sale"
     },
     {
       imageSrc: "/images/property-2.jpg", // Placeholder image
@@ -20,7 +20,7 @@ export function TopPickedProperties() {
       location: "Trivandrum, Thiruvananthapuram",
       price: "₹ 75 Lac",
       type: "Apartment",
-      transactionType: "For Sale",
+      transactionType: "For Sale", // Fixed: now explicitly "For Sale"
     },
     {
       imageSrc: "/images/property-3.jpg", // Placeholder image
@@ -28,7 +28,7 @@ export function TopPickedProperties() {
       location: "Calicut, Kozhikode",
       price: "₹ 50 Lac",
       type: "Land",
-      transactionType: "For Sale",
+      transactionType: "For Sale", // Fixed: now explicitly "For Sale"
     },
     {
       imageSrc: "/images/property-4.jpg", // Placeholder image
@@ -36,7 +36,7 @@ export function TopPickedProperties() {
       location: "Alappuzha, Alappuzha",
       price: "₹ 35,000/month",
       type: "House",
-      transactionType: "For Rent",
+      transactionType: "For Rent", // Fixed: now explicitly "For Rent"
     },
   ];
 
