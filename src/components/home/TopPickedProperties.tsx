@@ -82,17 +82,18 @@ export function TopPickedProperties() {
             opts={{
               align: "start",
             }}
-            className="w-full px-8"
+            className="w-full" // Removed px-8
           >
-            <CarouselContent className="-ml-4">
+            <CarouselContent className="-ml-4 px-6 md:px-8"> {/* Added px-6 md:px-8 here */}
               {propertiesToShow.map((property, index) => (
-                <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/5"> {/* Changed xl:basis-1/4 to xl:basis-1/5 */}
+                <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/5">
                   <PropertyCard {...property} index={index + 1} />
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <CarouselPrevious className="left-4" />
-            <CarouselNext className="right-4" />
+            {/* Buttons are now at the very edge of the Carousel, which aligns with CardContent's padding */}
+            <CarouselPrevious className="left-0" />
+            <CarouselNext className="right-0" />
           </Carousel>
         </CardContent>
       </Card>
