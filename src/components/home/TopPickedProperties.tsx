@@ -68,7 +68,7 @@ export function TopPickedProperties() {
 
   return (
     <section className="container py-12 md:py-20">
-      <Card className="p-6 md:p-8 shadow-lg">
+      <Card className="p-6 md:p-8 shadow-lg max-w-6xl mx-auto"> {/* Added max-w-6xl and mx-auto */}
         <CardHeader className="px-0 pt-0 pb-4 text-center md:text-left">
           <CardTitle className="text-3xl md:text-4xl font-bold mb-2">Top Picked Properties in Kerala</CardTitle>
           <CardDescription className="text-lg text-muted-foreground max-w-3xl mx-auto md:mx-0">
