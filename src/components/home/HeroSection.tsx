@@ -31,7 +31,7 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative w-full min-h-[calc(100vh-56px)] flex justify-center bg-gradient-to-r from-primary to-blue-600 text-primary-foreground
+    <section className="relative w-full min-h-[60vh] flex justify-center bg-gradient-to-r from-primary to-blue-600 text-primary-foreground
       items-start pt-20 md:items-center md:pt-0"> {/* Adjusted for responsive vertical alignment */}
       <div className="container px-4 md:px-6 text-center">
         <div className="max-w-3xl mx-auto space-y-6">
