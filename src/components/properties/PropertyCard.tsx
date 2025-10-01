@@ -6,7 +6,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
-interface PropertyCardProps {
+export interface PropertyCardProps { // Added 'export' here
   imageSrc: string;
   title: string;
   location: string;

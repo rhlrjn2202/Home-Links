@@ -5,8 +5,8 @@ import { PropertyCard } from '@/components/properties/PropertyCard';
 import type { PropertyCardProps } from '@/components/properties/PropertyCard'; // Import the type
 
 export function TopPickedProperties() {
-  // Placeholder data for 4 default properties
-  const properties: PropertyCardProps[] = [ // Explicitly type the array
+  // Placeholder data for 5 default properties
+  const properties: PropertyCardProps[] = [
     {
       imageSrc: "/images/property-1.jpg", // Placeholder image
       title: "Luxury Villa in Kochi",
@@ -39,12 +39,20 @@ export function TopPickedProperties() {
       type: "House",
       transactionType: "For Rent",
     },
+    {
+      imageSrc: "/images/property-1.jpg", // Reusing placeholder image for the 5th property
+      title: "Commercial Space in Thrissur",
+      location: "Thrissur, Thrissur",
+      price: "₹ 2.5 Cr",
+      type: "Commercial",
+      transactionType: "For Sale",
+    },
   ];
 
   return (
     <section className="container py-12 md:py-20">
       <h2 className="text-3xl md:text-4xl font-bold text-center mb-10">Top Picked Properties in Kerala</h2>
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl mx-auto"> {/* Changed to lg:grid-cols-5 */}
         {properties.map((property, index) => (
           <PropertyCard key={index} {...property} />
         ))}
