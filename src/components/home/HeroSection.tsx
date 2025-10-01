@@ -79,7 +79,7 @@ export function HeroSection() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* District Selector */}
               <Select onValueChange={setSelectedDistrict} value={selectedDistrict}>
-                <SelectTrigger className="w-full">
+                <SelectTrigger className="w-full text-foreground"> {/* Added text-foreground for better contrast */}
                   <SelectValue placeholder="Select District" />
                 </SelectTrigger>
                 <SelectContent>
