@@ -12,7 +12,7 @@ type TransactionType = 'buy' | 'rent';
 type PropertyType = 'land/plot' | 'house' | 'apartments' | 'commercial';
 
 const KERALA_DISTRICTS = [
-  "Alappuzha", "Ernakulam", "Idukki", "Kannur", "Kasaragod", "Kollam",
+  "Alappuzha", "Ernakulam", "Idukku", "Kannur", "Kasaragod", "Kollam",
   "Kottayam", "Kozhikode", "Malappuram", "Palakkad", "Pathanamthitta",
   "Thiruvananthapuram", "Thrissur", "Wayanad"
 ];
@@ -48,14 +48,14 @@ export function HeroSection() {
             Explore properties for sale and rent across all districts of Kerala.
           </p>
 
-          <div className="bg-background p-6 rounded-lg shadow-lg w-full mx-auto"> {/* Removed max-w-2xl */}
-            {/* Transaction Type Toggles (Buy/Rent) - kept as per original design, similar to reference image's top row */}
+          <div className="bg-background p-6 rounded-lg shadow-lg max-w-4xl w-full mx-auto"> {/* Adjusted width and centering */}
+            {/* Transaction Type Toggles (Buy/Rent) */}
             <div className="flex justify-center mb-6">
               <ToggleGroup
                 type="single"
                 value={transactionType}
                 onValueChange={(value: TransactionType) => value && setTransactionType(value)}
-                className="grid grid-cols-2 w-full max-w-sm"
+                className="grid grid-cols-2 w-full"
               >
                 <ToggleGroupItem value="buy" aria-label="Toggle Buy" className="w-full">
                   Buy
