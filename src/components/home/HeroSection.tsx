@@ -31,7 +31,8 @@ export function HeroSection() {
   };
 
   return (
-    <section className="relative w-full min-h-[calc(100vh-56px)] flex items-center justify-center bg-gradient-to-r from-primary to-blue-600 text-primary-foreground">
+    <section className="relative w-full min-h-[calc(100vh-56px)] flex justify-center bg-gradient-to-r from-primary to-blue-600 text-primary-foreground
+      items-start pt-20 md:items-center md:pt-0"> {/* Adjusted for responsive vertical alignment */}
       <div className="container px-4 md:px-6 text-center">
         <div className="max-w-3xl mx-auto space-y-6">
           <h1 className="text-3xl font-bold tracking-tighter sm:text-4xl md:text-5xl lg:text-6xl">
@@ -79,7 +80,7 @@ export function HeroSection() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               {/* District Selector */}
               <Select onValueChange={setSelectedDistrict} value={selectedDistrict}>
-                <SelectTrigger className="w-full text-foreground"> {/* Added text-foreground for better contrast */}
+                <SelectTrigger className="w-full text-foreground">
                   <SelectValue placeholder="Select District" />
                 </SelectTrigger>
                 <SelectContent>
