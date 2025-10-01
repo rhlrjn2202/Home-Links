@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { SearchInputWithIcons } from './SearchInputWithIcons'; // Import the new component
+import { SearchInputWithIcons } from './SearchInputWithIcons';
 
 type TransactionType = 'buy' | 'rent';
 type PropertyType = 'land/plot' | 'house' | 'apartments' | 'commercial';
@@ -19,11 +19,10 @@ const KERALA_DISTRICTS = [
 
 export function HeroSection() {
   const [transactionType, setTransactionType] = useState<TransactionType>('buy');
-  const [propertyType, setPropertyType] = useState<PropertyType>('house'); // Now controlled by Select
+  const [propertyType, setPropertyType] = useState<PropertyType>('house');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  const [budget, setBudget] = useState<string>(''); // New state for Budget
-  // Removed possessionStatus state
+  const [budget, setBudget] = useState<string>('');
 
   const handleSearch = () => {
     console.log({
@@ -32,7 +31,6 @@ export function HeroSection() {
       selectedDistrict,
       searchQuery,
       budget,
-      // Removed possessionStatus from log
     });
     // Implement actual search logic here later
   };
@@ -57,10 +55,26 @@ export function HeroSection() {
                 onValueChange={(value: TransactionType) => value && setTransactionType(value)}
                 className="grid grid-cols-2 w-full"
               >
-                <ToggleGroupItem value="buy" aria-label="Toggle Buy" className="w-full border"> {/* Added border */}
+                <ToggleGroupItem
+                  value="buy"
+                  aria-label="Toggle Buy"
+                  className={cn(
+                    "w-full border",
+                    "bg-background text-muted-foreground", // Default state
+                    "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground" // Selected state
+                  )}
+                >
                   Buy
                 </ToggleGroupItem>
-                <ToggleGroupItem value="rent" aria-label="Toggle Rent" className="w-full border"> {/* Added border */}
+                <ToggleGroupItem
+                  value="rent"
+                  aria-label="Toggle Rent"
+                  className={cn(
+                    "w-full border",
+                    "bg-background text-muted-foreground", // Default state
+                    "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground" // Selected state
+                  )}
+                >
                   Rent
                 </ToggleGroupItem>
               </ToggleGroup>
@@ -118,8 +132,6 @@ export function HeroSection() {
                   <SelectItem value="commercial">Commercial</SelectItem>
                 </SelectContent>
               </Select>
-
-              {/* Removed Possession Status Selector */}
 
               {/* Search Button */}
               <Button onClick={handleSearch} className="w-full md:col-span-1">
