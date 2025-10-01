@@ -57,14 +57,14 @@ export function PropertyCategories() {
 
   return (
     <section className="container py-12 md:py-20">
-      <Card className="p-6 md:p-8 shadow-lg max-w-4xl mx-auto"> {/* Added max-w-4xl and mx-auto */}
+      <Card className="p-6 md:p-8 shadow-lg max-w-4xl mx-auto">
         <CardHeader className="px-0 pt-0 pb-4 text-center md:text-left">
           <CardTitle className="text-3xl md:text-4xl font-bold mb-2">Explore by Property Type</CardTitle>
           <CardDescription className="text-lg text-muted-foreground max-w-3xl mx-auto md:mx-0">
             Discover various property types available, from modern apartments to spacious lands, tailored to your needs.
           </CardDescription>
         </CardHeader>
-        <CardContent className="px-0">
+        <CardContent> {/* Removed px-0 */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
             {categories.map((category, index) => (
               <CategoryCard key={index} {...category} />
