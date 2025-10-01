@@ -18,10 +18,8 @@ const KERALA_DISTRICTS = [
 
 export function HeroSection() {
   const [transactionType, setTransactionType] = useState<TransactionType>('buy');
-  // Removed propertyType state
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
-  // Removed budget state
 
   const handleSearch = () => {
     console.log({
@@ -93,14 +91,12 @@ export function HeroSection() {
                 </SelectContent>
               </Select>
 
-              {/* Search Input with Location and Voice Icons */}
+              {/* Search Input */}
               <SearchInputWithIcons
                 placeholder="Search by Project, Locality, or Builder"
                 value={searchQuery}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearchQuery(e.target.value)}
                 className="md:col-span-2"
-                onLocationClick={() => console.log('Location icon clicked')}
-                onVoiceSearchClick={() => console.log('Voice icon clicked')}
               />
 
               {/* Search Button */}
