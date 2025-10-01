@@ -66,12 +66,12 @@ export function TopPickedProperties() {
     },
   ];
 
-  const propertiesToShow = allProperties.slice(0, 5); // Limit to the first 5 properties
+  const propertiesToShow = allProperties.slice(0, 4); // Changed to show only 4 properties
 
   return (
-    <section className="py-12 md:py-20 w-full"> {/* Removed 'container' from section */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8"> {/* New wrapper div for centering content */}
-        <Card className="p-6 md:p-8 shadow-lg max-w-6xl mx-auto"> {/* Card is now explicitly centered within the new container div */}
+    <section className="py-12 md:py-20 w-full">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <Card className="p-6 md:p-8 shadow-lg max-w-6xl mx-auto">
           <CardHeader className="px-0 pt-0 pb-4 text-center md:text-left">
             <CardTitle className="text-3xl md:text-4xl font-bold mb-2">Top Picked Properties in Kerala</CardTitle>
             <CardDescription className="text-lg text-muted-foreground max-w-3xl mx-auto md:mx-0">
