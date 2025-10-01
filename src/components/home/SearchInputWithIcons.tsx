@@ -11,7 +11,7 @@ export const SearchInputWithIcons = React.forwardRef<HTMLInputElement, SearchInp
   ({ className, ...props }, ref) => {
     return (
       <div className={cn("relative flex items-center w-full", className)}>
-        <Input ref={ref} className="pr-4" {...props} /> {/* Adjusted padding */}
+        <Input ref={ref} className="pr-4 text-foreground" {...props} /> {/* Added text-foreground for better contrast */}
       </div>
     );
   }
