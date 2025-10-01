@@ -86,7 +86,7 @@ export function TopPickedProperties() {
           >
             <CarouselContent className="-ml-4">
               {propertiesToShow.map((property, index) => (
-                <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/5"> {/* Changed xl:basis-1/4 to xl:basis-1/5 */}
                   <PropertyCard {...property} index={index + 1} />
                 </CarouselItem>
               ))}
