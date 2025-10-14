@@ -7,8 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
 import { SubmitPropertyButton } from '@/components/SubmitPropertyButton'; // Import the new component
+import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
+import { supabase } from '@/integrations/supabase/client'; // Import supabase client
 
 export function Header() {
+  const { session, user, loading, isAdmin } = useSession();
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center px-4 sm:px-6 lg:px-8">
@@ -19,10 +27,23 @@ export function Header() {
         <div className="flex-1 flex items-center justify-end space-x-4">
           {/* Desktop Navigation/Buttons */}
           <nav className="hidden md:flex items-center space-x-4">
-            <SubmitPropertyButton /> {/* Using the new component */}
-            <Button asChild>
-              <Link href="/login">Login</Link>
-            </Button>
+            <SubmitPropertyButton />
+            {loading ? (
+              <div className="h-9 w-20 animate-pulse rounded-md bg-muted" />
+            ) : session ? (
+              <>
+                {isAdmin && (
+                  <Button asChild variant="ghost">
+                    <Link href="/admin/dashboard">Admin</Link>
+                  </Button>
+                )}
+                <Button onClick={handleLogout}>Logout</Button>
+              </>
+            ) : (
+              <Button asChild>
+                <Link href="/userauth/login">Login</Link>
+              </Button>
+            )}
           </nav>
 
           {/* Mobile Navigation/Buttons */}
@@ -35,10 +56,23 @@ export function Header() {
             </SheetTrigger>
             <SheetContent side="right">
               <div className="flex flex-col gap-4 p-4">
-                <SubmitPropertyButton /> {/* Using the new component */}
-                <Button asChild className="w-full">
-                  <Link href="/login">Login</Link>
-                </Button>
+                <SubmitPropertyButton />
+                {loading ? (
+                  <div className="h-9 w-full animate-pulse rounded-md bg-muted" />
+                ) : session ? (
+                  <>
+                    {isAdmin && (
+                      <Button asChild variant="ghost" className="w-full">
+                        <Link href="/admin/dashboard">Admin</Link>
+                      </Button>
+                    )}
+                    <Button onClick={handleLogout} className="w-full">Logout</Button>
+                  </>
+                ) : (
+                  <Button asChild className="w-full">
+                    <Link href="/userauth/login">Login</Link>
+                  </Button>
+                )}
               </div>
             </SheetContent>
           </Sheet>
