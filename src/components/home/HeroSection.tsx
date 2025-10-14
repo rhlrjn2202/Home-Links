@@ -55,7 +55,7 @@ export function HeroSection() {
                   value="buy"
                   aria-label="Toggle Buy"
                   className={cn(
-                    "w-full border",
+                    "w-full border h-10", // Added h-10 for uniform height
                     "bg-background text-muted-foreground",
                     "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                   )}
@@ -66,7 +66,7 @@ export function HeroSection() {
                   value="rent"
                   aria-label="Toggle Rent"
                   className={cn(
-                    "w-full border",
+                    "w-full border h-10", // Added h-10 for uniform height
                     "bg-background text-muted-foreground",
                     "data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
                   )}
