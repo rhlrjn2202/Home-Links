@@ -46,8 +46,8 @@ export default function AdminLoginPage() {
                     defaultButtonBackgroundHover: 'hsl(var(--primary-foreground))',
                     defaultButtonBorder: 'hsl(var(--primary))',
                     defaultButtonText: 'hsl(var(--primary-foreground))',
-                    anchorText: 'hsl(var(--primary))',
-                    anchorTextHover: 'hsl(var(--primary-foreground))',
+                    anchorTextColor: 'hsl(var(--primary))', // Fixed property name
+                    anchorTextHoverColor: 'hsl(var(--primary-foreground))', // Fixed property name
                   },
                 },
               },
