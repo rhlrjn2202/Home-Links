@@ -24,77 +24,42 @@ export function SessionContextProvider({ children }: { children: React.ReactNode
   const pathname = usePathname();
 
   useEffect(() => {
-    const { data: authListener } = supabase.auth.onAuthStateChange(
-      async (event, currentSession) => {
-        setSession(currentSession);
-        setUser(currentSession?.user || null);
-        setLoading(false);
-
-        if (currentSession?.user) {
-          // Check if the user is an admin
-          const { data: adminData, error: adminError } = await supabase
-            .from('admin_profiles')
-            .select('id')
-            .eq('id', currentSession.user.id)
-            .single();
-
-          if (adminError && adminError.code !== 'PGRST116') { // PGRST116 means no rows found
-            console.error('Error checking admin status:', adminError);
-            toast.error('Failed to check admin status.');
-          }
-          setIsAdmin(!!adminData);
-
-          // Redirect logic for authenticated users
-          if (pathname.startsWith('/userauth/login') && !adminData) {
-            router.push('/');
-          } else if (pathname.startsWith('/adminauth/login') && adminData) {
-            router.push('/admin/dashboard');
-          } else if (pathname.startsWith('/adminauth/login') && !adminData) {
-            // If a non-admin tries to access admin login and is authenticated, redirect to user home
-            router.push('/');
-          }
-        } else {
-          setIsAdmin(false);
-          // Redirect logic for unauthenticated users
-          if (pathname.startsWith('/userauth') && !pathname.startsWith('/userauth/login')) {
-            router.push('/userauth/login');
-          } else if (pathname.startsWith('/adminauth') && !pathname.startsWith('/adminauth/login')) {
-            router.push('/adminauth/login');
-          } else if (pathname.startsWith('/admin/dashboard')) {
-            router.push('/adminauth/login');
-          }
-        }
-      }
-    );
-
-    // Initial session check
-    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
-      setSession(initialSession);
-      setUser(initialSession?.user || null);
+    const handleAuthStateChange = async (event: string, currentSession: Session | null) => {
+      setSession(currentSession);
+      setUser(currentSession?.user || null);
       setLoading(false);
-      if (initialSession?.user) {
-        supabase
+
+      if (currentSession?.user) {
+        // Check if the user is an admin
+        const { data: adminData, error: adminError } = await supabase
           .from('admin_profiles')
           .select('id')
-          .eq('id', initialSession.user.id)
-          .single()
-          .then(({ data: adminData, error: adminError }) => {
-            if (adminError && adminError.code !== 'PGRST116') {
-              console.error('Error checking initial admin status:', adminError);
-              toast.error('Failed to check admin status.');
-            }
-            setIsAdmin(!!adminData);
-            // Apply initial redirects
-            if (pathname.startsWith('/userauth/login') && !adminData) {
-              router.push('/');
-            } else if (pathname.startsWith('/adminauth/login') && adminData) {
-              router.push('/admin/dashboard');
-            } else if (pathname.startsWith('/adminauth/login') && !adminData) {
-              router.push('/');
-            }
-          });
+          .eq('id', currentSession.user.id)
+          .single();
+
+        if (adminError && adminError.code !== 'PGRST116') { // PGRST116 means no rows found
+          console.error('Error checking admin status:', adminError);
+          toast.error('Failed to check admin status.');
+        }
+        const userIsAdmin = !!adminData;
+        setIsAdmin(userIsAdmin);
+
+        // Redirect logic for authenticated users
+        if (pathname.startsWith('/userauth/login') && !userIsAdmin) {
+          router.push('/');
+        } else if (pathname.startsWith('/adminauth/login') && userIsAdmin) {
+          router.push('/admin/dashboard');
+        } else if (pathname.startsWith('/adminauth/login') && !userIsAdmin) {
+          // If a non-admin tries to access admin login and is authenticated, redirect to user home
+          router.push('/');
+        } else if (pathname.startsWith('/admin/dashboard') && !userIsAdmin) {
+          // NEW: Redirect authenticated non-admins from admin dashboard
+          toast.error('Access Denied: You are not an administrator.');
+          router.push('/adminauth/login');
+        }
       } else {
-        // Apply initial redirects for unauthenticated users
+        setIsAdmin(false);
+        // Redirect logic for unauthenticated users
         if (pathname.startsWith('/userauth') && !pathname.startsWith('/userauth/login')) {
           router.push('/userauth/login');
         } else if (pathname.startsWith('/adminauth') && !pathname.startsWith('/adminauth/login')) {
@@ -103,6 +68,13 @@ export function SessionContextProvider({ children }: { children: React.ReactNode
           router.push('/adminauth/login');
         }
       }
+    };
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(handleAuthStateChange);
+
+    // Initial session check
+    supabase.auth.getSession().then(({ data: { session: initialSession } }) => {
+      handleAuthStateChange('INITIAL_SESSION', initialSession);
     });
 
     return () => {
