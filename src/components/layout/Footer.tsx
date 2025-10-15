@@ -1,16 +1,83 @@
 "use client";
 
 import React from 'react';
+import Link from 'next/link';
+import { Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
 import { MadeWithDyad } from '@/components/made-with-dyad';
 
 export function Footer() {
+  const currentYear = new Date().getFullYear();
+
+  const navLinks = [
+    { name: "About Us", href: "/about" },
+    { name: "Careers", href: "/careers" },
+    { name: "Terms & Conditions", href: "/terms" },
+    { name: "Privacy Policy", href: "/privacy" },
+    { name: "Sitemap", href: "/sitemap" },
+  ];
+
+  const socialLinks = [
+    { icon: Facebook, href: "https://facebook.com" },
+    { icon: Twitter, href: "https://twitter.com" },
+    { icon: Instagram, href: "https://instagram.com" },
+    { icon: Linkedin, href: "https://linkedin.com" },
+    { icon: Youtube, href: "https://youtube.com" },
+  ];
+
   return (
-    <footer className="border-t bg-black py-4"> {/* Changed bg-background to bg-black */}
-      <div className="container flex flex-col items-center justify-between gap-4 px-4 sm:flex-row sm:px-6 lg:px-8">
-        <p className="text-sm text-white"> {/* Changed text-muted-foreground to text-white */}
-          &copy; {new Date().getFullYear()} Home Links. All rights reserved.
-        </p>
-        <MadeWithDyad />
+    <footer className="bg-black text-white py-8 md:py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 flex flex-col items-center text-center">
+        {/* Navigation Links */}
+        <nav className="mb-8">
+          <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm md:text-base">
+            {navLinks.map((link) => (
+              <li key={link.name}>
+                <Link href={link.href} className="hover:text-gray-300 transition-colors">
+                  {link.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
+
+        {/* Divider */}
+        <div className="w-full border-t border-gray-700 mb-8 max-w-3xl" />
+
+        {/* App Download Links */}
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
+          {/* Placeholder for Google Play */}
+          <div className="flex items-center justify-center h-12 w-40 bg-gray-800 rounded-lg text-sm font-semibold hover:bg-gray-700 transition-colors cursor-pointer">
+            Get it on Google Play
+          </div>
+          {/* Placeholder for App Store */}
+          <div className="flex items-center justify-center h-12 w-40 bg-gray-800 rounded-lg text-sm font-semibold hover:bg-gray-700 transition-colors cursor-pointer">
+            Download on the App Store
+          </div>
+        </div>
+
+        {/* Social Media Icons */}
+        <div className="flex justify-center gap-4 mb-8">
+          {socialLinks.map((social, index) => (
+            <a
+              key={index}
+              href={social.href}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-700 hover:bg-gray-600 transition-colors"
+              aria-label={social.icon.displayName}
+            >
+              <social.icon className="h-5 w-5 text-white" />
+            </a>
+          ))}
+        </div>
+
+        {/* Copyright and Made with Dyad */}
+        <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-3xl mt-4 pt-4 border-t border-gray-700">
+          <p className="text-sm text-gray-400 mb-2 md:mb-0">
+            &copy; {currentYear} Home Links. All rights reserved.
+          </p>
+          <MadeWithDyad />
+        </div>
       </div>
     </footer>
   );
