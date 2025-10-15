@@ -33,6 +33,14 @@ export function SessionContextProvider({ children }: { children: React.ReactNode
       setUser(currentSession?.user || null);
       setLoading(false);
 
+      if (event === 'SIGNED_OUT') {
+        toast.success('You have been logged out successfully.');
+        // Redirect to home page after logout, unless already on a login page
+        if (!pathname.startsWith('/userauth/login') && !pathname.startsWith('/adminauth/login')) {
+          router.push('/');
+        }
+      }
+
       if (currentSession?.user) {
         console.log('Authenticated User ID:', currentSession.user.id);
         // Check if the user is an admin
@@ -61,7 +69,6 @@ export function SessionContextProvider({ children }: { children: React.ReactNode
           console.log('Redirecting authenticated non-admin from admin login to /');
           router.push('/');
         } else if (pathname.startsWith('/admin/dashboard') && !userIsAdmin) {
-          // NEW: Redirect authenticated non-admins from admin dashboard
           console.log('Redirecting authenticated non-admin from admin dashboard to /adminauth/login');
           toast.error('Access Denied: You are not an administrator.');
           router.push('/adminauth/login');
@@ -69,7 +76,7 @@ export function SessionContextProvider({ children }: { children: React.ReactNode
       } else {
         setIsAdmin(false);
         console.log('User is not authenticated.');
-        // Redirect logic for unauthenticated users
+        // Redirect logic for unauthenticated users on protected paths
         if (pathname.startsWith('/userauth') && !pathname.startsWith('/userauth/login')) {
           console.log('Redirecting unauthenticated user from userauth page to /userauth/login');
           router.push('/userauth/login');
