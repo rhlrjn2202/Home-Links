@@ -33,7 +33,9 @@ export function SessionContextProvider({ children }: { children: React.ReactNode
       setUser(currentSession?.user || null);
       setLoading(false);
 
-      if (event === 'SIGNED_OUT') {
+      if (event === 'SIGNED_IN') {
+        toast.success('You have been logged in successfully!'); // Success toast for login
+      } else if (event === 'SIGNED_OUT') {
         toast.success('You have been logged out successfully.');
         // Redirect to home page after logout, unless already on a login page
         if (!pathname.startsWith('/userauth/login') && !pathname.startsWith('/adminauth/login')) {

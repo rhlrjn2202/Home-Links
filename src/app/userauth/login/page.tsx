@@ -8,6 +8,7 @@ import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { Loader2 } from 'lucide-react';
+import { toast } from 'sonner'; // Import toast
 
 export default function UserLoginPage() {
   const { loading } = useSession();
@@ -46,14 +47,14 @@ export default function UserLoginPage() {
                     defaultButtonBackgroundHover: 'hsl(var(--primary-foreground))',
                     defaultButtonBorder: 'hsl(var(--primary))',
                     defaultButtonText: 'hsl(var(--primary-foreground))',
-                    anchorTextColor: 'hsl(var(--primary))', // Fixed property name
-                    anchorTextHoverColor: 'hsl(var(--primary-foreground))', // Fixed property name
+                    anchorTextColor: 'hsl(var(--primary))',
+                    anchorTextHoverColor: 'hsl(var(--primary-foreground))',
                   },
                 },
               },
             }}
             theme="light" // Use light theme by default
-            redirectTo={process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'} // Redirect to home after auth
+            // Removed redirectTo prop to allow SessionContextProvider to handle redirects
           />
         </div>
       </main>
