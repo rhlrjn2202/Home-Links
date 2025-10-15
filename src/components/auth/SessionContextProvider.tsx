@@ -25,11 +25,16 @@ export function SessionContextProvider({ children }: { children: React.ReactNode
 
   useEffect(() => {
     const handleAuthStateChange = async (event: string, currentSession: Session | null) => {
+      console.log('Auth State Change Event:', event);
+      console.log('Current Pathname:', pathname);
+      console.log('Current Session:', currentSession);
+
       setSession(currentSession);
       setUser(currentSession?.user || null);
       setLoading(false);
 
       if (currentSession?.user) {
+        console.log('Authenticated User ID:', currentSession.user.id);
         // Check if the user is an admin
         const { data: adminData, error: adminError } = await supabase
           .from('admin_profiles')
@@ -43,28 +48,36 @@ export function SessionContextProvider({ children }: { children: React.ReactNode
         }
         const userIsAdmin = !!adminData;
         setIsAdmin(userIsAdmin);
+        console.log('Is Admin:', userIsAdmin);
 
         // Redirect logic for authenticated users
         if (pathname.startsWith('/userauth/login') && !userIsAdmin) {
+          console.log('Redirecting non-admin from user login to /');
           router.push('/');
         } else if (pathname.startsWith('/adminauth/login') && userIsAdmin) {
+          console.log('Redirecting admin from admin login to /admin/dashboard');
           router.push('/admin/dashboard');
         } else if (pathname.startsWith('/adminauth/login') && !userIsAdmin) {
-          // If a non-admin tries to access admin login and is authenticated, redirect to user home
+          console.log('Redirecting authenticated non-admin from admin login to /');
           router.push('/');
         } else if (pathname.startsWith('/admin/dashboard') && !userIsAdmin) {
           // NEW: Redirect authenticated non-admins from admin dashboard
+          console.log('Redirecting authenticated non-admin from admin dashboard to /adminauth/login');
           toast.error('Access Denied: You are not an administrator.');
           router.push('/adminauth/login');
         }
       } else {
         setIsAdmin(false);
+        console.log('User is not authenticated.');
         // Redirect logic for unauthenticated users
         if (pathname.startsWith('/userauth') && !pathname.startsWith('/userauth/login')) {
+          console.log('Redirecting unauthenticated user from userauth page to /userauth/login');
           router.push('/userauth/login');
         } else if (pathname.startsWith('/adminauth') && !pathname.startsWith('/adminauth/login')) {
+          console.log('Redirecting unauthenticated user from adminauth page to /adminauth/login');
           router.push('/adminauth/login');
         } else if (pathname.startsWith('/admin/dashboard')) {
+          console.log('Redirecting unauthenticated user from admin dashboard to /adminauth/login');
           router.push('/adminauth/login');
         }
       }
