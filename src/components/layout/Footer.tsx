@@ -3,7 +3,6 @@
 import React from 'react';
 import Link from 'next/link';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
-import { MadeWithDyad } from '@/components/made-with-dyad';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -71,12 +70,11 @@ export function Footer() {
           ))}
         </div>
 
-        {/* Copyright and Made with Dyad */}
-        <div className="flex flex-col md:flex-row items-center justify-between w-full max-w-3xl mt-4 pt-4 border-t border-gray-700">
-          <p className="text-sm text-gray-400 mb-2 md:mb-0">
+        {/* Copyright */}
+        <div className="w-full max-w-3xl mt-4 pt-4 border-t border-gray-700">
+          <p className="text-sm text-gray-400 text-center">
             &copy; {currentYear} Home Links. All rights reserved.
           </p>
-          <MadeWithDyad />
         </div>
       </div>
     </footer>
