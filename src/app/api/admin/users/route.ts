@@ -4,22 +4,34 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   try {
+    // Log environment variables to confirm they are loaded
+    console.log('API Route: NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not Set');
+    console.log('API Route: NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not Set');
+
+    // Await cookies() to ensure we're working with the resolved ReadonlyRequestCookies object
+    const cookieStore = await cookies(); 
+
+    // Log all cookies received by the API route
+    console.log('API Route: All cookies received:');
+    cookieStore.getAll().forEach((cookie: { name: string; value: string }) => {
+      // Log only the first few characters of the value for security/brevity
+      console.log(`  - ${cookie.name}: ${cookie.value.substring(0, Math.min(cookie.value.length, 10))}...`);
+    });
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
           get: async (name: string) => {
-            const cookieStore = await cookies();
-            return cookieStore.get(name)?.value;
+            // Call cookies() and await it inside these functions as well
+            return (await cookies()).get(name)?.value;
           },
           set: async (name: string, value: string, options: CookieOptions) => {
-            const cookieStore = await cookies();
-            cookieStore.set(name, value, options);
+            (await cookies()).set(name, value, options);
           },
           remove: async (name: string, options: CookieOptions) => {
-            const cookieStore = await cookies();
-            cookieStore.set(name, '', options);
+            (await cookies()).set(name, '', options);
           },
         },
       }
