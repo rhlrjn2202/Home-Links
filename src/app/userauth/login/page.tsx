@@ -54,7 +54,6 @@ export default function UserLoginPage() {
               },
             }}
             theme="light" // Use light theme by default
-            // Removed redirectTo prop to allow SessionContextProvider to handle redirects
           />
         </div>
       </main>
