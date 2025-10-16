@@ -14,24 +14,31 @@ export async function GET(request: Request) {
     // Log all cookies received by the API route
     console.log('API Route: All cookies received:');
     cookieStore.getAll().forEach((cookie: { name: string; value: string }) => {
-      // Log only the first few characters of the value for security/brevity
       console.log(`  - ${cookie.name}: ${cookie.value.substring(0, Math.min(cookie.value.length, 10))}...`);
     });
+
+    // Log specific Supabase cookies for debugging
+    console.log('API Route: sb-access-token:', cookieStore.get('sb-access-token')?.value ? 'Present' : 'Missing');
+    console.log('API Route: sb-refresh-token:', cookieStore.get('sb-refresh-token')?.value ? 'Present' : 'Missing');
+    if (cookieStore.get('sb-access-token')?.value) {
+      console.log('API Route: sb-access-token value (first 20 chars):', cookieStore.get('sb-access-token')?.value?.substring(0, 20));
+    }
+    if (cookieStore.get('sb-refresh-token')?.value) {
+      console.log('API Route: sb-refresh-token value (first 20 chars):', cookieStore.get('sb-refresh-token')?.value?.substring(0, 20));
+    }
 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          get: async (name: string) => {
-            // Call cookies() and await it inside these functions as well
-            return (await cookies()).get(name)?.value;
+          // These handlers must be synchronous and use the already-awaited cookieStore
+          get: (name: string) => cookieStore.get(name)?.value,
+          set: (name: string, value: string, options: CookieOptions) => {
+            cookieStore.set(name, value, options);
           },
-          set: async (name: string, value: string, options: CookieOptions) => {
-            (await cookies()).set(name, value, options);
-          },
-          remove: async (name: string, options: CookieOptions) => {
-            (await cookies()).set(name, '', options);
+          remove: (name: string, options: CookieOptions) => {
+            cookieStore.set(name, '', options);
           },
         },
       }
