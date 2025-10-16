@@ -42,7 +42,6 @@ export async function GET(request: Request) {
       created_at,
       user_profiles (
         first_name,
-        last_name,
         mobile_number
       ),
       user_subscriptions (
@@ -75,7 +74,7 @@ export async function GET(request: Request) {
       return {
         slNo: index + 1,
         id: u.id,
-        name: `${profile.first_name || ''} ${profile.last_name || ''}`.trim() || 'N/A',
+        name: profile.first_name || 'N/A', // Only use first_name
         mobileNumber: profile.mobile_number || 'N/A',
         email: u.email || 'N/A',
         accountCreated: new Date(u.created_at).toLocaleDateString(),

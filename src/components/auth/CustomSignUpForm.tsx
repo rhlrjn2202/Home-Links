@@ -21,7 +21,6 @@ import { toast } from 'sonner';
 
 const formSchema = z.object({
   firstName: z.string().min(1, { message: 'First Name is required.' }),
-  lastName: z.string().optional(), // Last Name is now optional
   mobileNumber: z.string().regex(/^[6-9]\d{9}$/, {
     message: 'Please enter a valid 10-digit Indian mobile number.',
   }),
@@ -43,7 +42,6 @@ export function CustomSignUpForm({ onSignUpSuccess }: CustomSignUpFormProps) {
     resolver: zodResolver(formSchema),
     defaultValues: {
       firstName: '',
-      lastName: '',
       mobileNumber: '',
       email: '',
       password: '',
@@ -52,7 +50,7 @@ export function CustomSignUpForm({ onSignUpSuccess }: CustomSignUpFormProps) {
 
   async function onSubmit(values: SignUpFormValues) {
     setIsLoading(true);
-    const { email, password, firstName, lastName, mobileNumber } = values;
+    const { email, password, firstName, mobileNumber } = values;
 
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -60,7 +58,6 @@ export function CustomSignUpForm({ onSignUpSuccess }: CustomSignUpFormProps) {
       options: {
         data: {
           first_name: firstName,
-          last_name: lastName,
           mobile_number: mobileNumber,
         },
       },
@@ -88,19 +85,6 @@ export function CustomSignUpForm({ onSignUpSuccess }: CustomSignUpFormProps) {
               <FormLabel>First Name</FormLabel>
               <FormControl>
                 <Input placeholder="Your first name" {...field} />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
-          name="lastName"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>Last Name (Optional)</FormLabel>
-              <FormControl>
-                <Input placeholder="Your last name" {...field} />
               </FormControl>
               <FormMessage />
             </FormItem>
