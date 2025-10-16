@@ -26,12 +26,15 @@ export async function GET(request: Request) {
     );
 
     // 1. Check if the user is authenticated
-    const { data: { user } } = await supabase.auth.getUser();
+    const { data: { user }, error: userError } = await supabase.auth.getUser();
     
-    // Log the user object for debugging
-    console.log('User from supabase.auth.getUser() in API route:', user?.id);
+    console.log('API Route: User from supabase.auth.getUser():', user);
+    if (userError) {
+      console.error('API Route: Error getting user:', userError);
+    }
 
     if (!user) {
+      console.log('API Route: No user found, returning 401 Unauthorized.');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
@@ -42,8 +45,11 @@ export async function GET(request: Request) {
       .eq('id', user.id)
       .single();
 
+    console.log('API Route: Admin Profile Check - Data:', adminProfile);
+    console.log('API Route: Admin Profile Check - Error:', adminError);
+
     if (adminError || !adminProfile) {
-      console.warn(`User ${user.id} attempted to access admin users API without admin profile.`);
+      console.warn(`API Route: User ${user.id} attempted to access admin users API without admin profile or encountered an error.`);
       return NextResponse.json({ error: 'Forbidden: Not an admin' }, { status: 403 });
     }
 
@@ -53,7 +59,7 @@ export async function GET(request: Request) {
       .select('id');
 
     if (allAdminProfilesError) {
-      console.error('Error fetching all admin profiles:', allAdminProfilesError);
+      console.error('API Route: Error fetching all admin profiles for filtering:', allAdminProfilesError);
       return NextResponse.json({ error: 'Failed to fetch admin profiles for filtering' }, { status: 500 });
     }
 
@@ -78,7 +84,7 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: true });
 
     if (usersError) {
-      console.error('Error fetching users from Supabase:', usersError);
+      console.error('API Route: Error fetching users from Supabase:', usersError);
       return NextResponse.json({ error: 'Failed to fetch users from database' }, { status: 500 });
     }
 
@@ -111,7 +117,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(formattedUsers);
   } catch (error) {
-    console.error('Unhandled error in /api/admin/users:', error);
+    console.error('API Route: Unhandled error in /api/admin/users:', error);
     return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
