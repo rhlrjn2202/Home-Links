@@ -35,6 +35,18 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Forbidden: Not an admin' }, { status: 403 });
     }
 
+    // Fetch all admin user IDs to exclude them from the normal user list
+    const { data: allAdminProfiles, error: allAdminProfilesError } = await supabase
+      .from('admin_profiles')
+      .select('id');
+
+    if (allAdminProfilesError) {
+      console.error('Error fetching all admin profiles:', allAdminProfilesError);
+      return NextResponse.json({ error: 'Failed to fetch admin profiles for filtering' }, { status: 500 });
+    }
+
+    const adminUserIds = allAdminProfiles.map(admin => admin.id);
+
     // 3. Fetch user data, profiles, and subscriptions
     const { data: usersData, error: usersError } = await supabase
       .from('auth.users')
@@ -58,9 +70,9 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Failed to fetch users from database' }, { status: 500 });
     }
 
-    // 4. Process data for the table
+    // 4. Process data for the table, filtering out all admin users
     const formattedUsers = usersData
-      .filter(u => u.id !== user.id) // Exclude the current admin user from the list
+      .filter(u => !adminUserIds.includes(u.id)) // Exclude all admin users
       .map((u, index) => {
         const profile = u.user_profiles?.[0] || {}; // Assuming one profile per user
         const subscription = u.user_subscriptions?.[0] || {}; // Assuming one active subscription per user
@@ -76,7 +88,7 @@ export async function GET(request: Request) {
         return {
           slNo: index + 1,
           id: u.id,
-          name: profile.first_name || 'N/A', // Only use first_name
+          name: profile.first_name || 'N/A',
           mobileNumber: profile.mobile_number || 'N/A',
           email: u.email || 'N/A',
           accountCreated: new Date(u.created_at).toLocaleDateString(),
