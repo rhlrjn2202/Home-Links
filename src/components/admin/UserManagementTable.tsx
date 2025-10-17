@@ -10,10 +10,10 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Loader2 } from 'lucide-react';
+import { Button } from '@/components/ui/button'; // Import Button for pagination
+import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react'; // Import icons for pagination
 import { toast } from 'sonner';
 import { useSession } from '@/components/auth/SessionContextProvider';
-// Removed unused import: import { supabase } from '@/integrations/supabase/client';
 
 interface UserData {
   slNo: number;
@@ -26,54 +26,73 @@ interface UserData {
   daysLeft: number | string;
 }
 
+const ITEMS_PER_PAGE = 10; // Default items per page
+
 export function UserManagementTable() {
   const { session, loading: sessionLoading } = useSession();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalUsers, setTotalUsers] = useState(0);
+
+  const fetchUsers = async () => {
+    if (sessionLoading) return;
+
+    if (!session?.access_token) {
+      setError('Authentication session not available. Please log in again.');
+      setLoading(false);
+      toast.error('Authentication required to view user data.');
+      return;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const SUPABASE_URL = "https://vytctxgktgblnrsznhgw.supabase.co";
+      const edgeFunctionUrl = new URL(`${SUPABASE_URL}/functions/v1/admin-users`);
+      edgeFunctionUrl.searchParams.append('page', currentPage.toString());
+      edgeFunctionUrl.searchParams.append('limit', ITEMS_PER_PAGE.toString());
+      // Default sort by created_at in descending order
+      edgeFunctionUrl.searchParams.append('sortBy', 'created_at');
+      edgeFunctionUrl.searchParams.append('sortOrder', 'desc');
+
+      const response = await fetch(edgeFunctionUrl.toString(), {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+        },
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || 'Failed to fetch users');
+      }
+      const { users: fetchedUsers, totalCount }: { users: UserData[], totalCount: number } = await response.json();
+      setUsers(fetchedUsers);
+      setTotalUsers(totalCount);
+    } catch (err: any) {
+      console.error('Error fetching users:', err);
+      setError(err.message || 'An unexpected error occurred.');
+      toast.error(err.message || 'Failed to load user data.');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      if (sessionLoading) return;
-
-      if (!session?.access_token) {
-        setError('Authentication session not available. Please log in again.');
-        setLoading(false);
-        toast.error('Authentication required to view user data.');
-        return;
-      }
-
-      try {
-        setLoading(true);
-        setError(null);
-
-        // Construct the full Supabase Edge Function URL
-        const SUPABASE_URL = "https://vytctxgktgblnrsznhgw.supabase.co"; // Directly use the project URL
-        const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/admin-users`;
-
-        const response = await fetch(edgeFunctionUrl, {
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-          },
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Failed to fetch users');
-        }
-        const data: UserData[] = await response.json();
-        setUsers(data);
-      } catch (err: any) {
-        console.error('Error fetching users:', err);
-        setError(err.message || 'An unexpected error occurred.');
-        toast.error(err.message || 'Failed to load user data.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
     fetchUsers();
-  }, [session, sessionLoading]);
+  }, [session, sessionLoading, currentPage]); // Re-fetch when session or page changes
+
+  const totalPages = Math.ceil(totalUsers / ITEMS_PER_PAGE);
+
+  const handlePreviousPage = () => {
+    setCurrentPage((prev) => Math.max(prev - 1, 1));
+  };
+
+  const handleNextPage = () => {
+    setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
 
   if (loading || sessionLoading) {
     return (
@@ -136,6 +155,30 @@ export function UserManagementTable() {
             </TableBody>
           </Table>
         </div>
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-end space-x-2 py-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePreviousPage}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="h-4 w-4 mr-2" /> Previous
+            </Button>
+            <span className="text-sm text-muted-foreground">
+              Page {currentPage} of {totalPages}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleNextPage}
+              disabled={currentPage === totalPages}
+            >
+              Next <ChevronRight className="h-4 w-4 ml-2" />
+            </Button>
+          </div>
+        )}
       </CardContent>
     </Card>
   );
