@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from 'react'; // Removed React import
-import { useNavigate } from 'react-router-dom'; // Changed from next/navigation
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -35,7 +35,7 @@ interface CustomSignUpFormProps {
 }
 
 export function CustomSignUpForm({ onSignUpSuccess }: CustomSignUpFormProps) {
-  const navigate = useNavigate(); // Changed from useRouter
+  const navigate = useNavigate();
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<SignUpFormValues>({
@@ -64,12 +64,21 @@ export function CustomSignUpForm({ onSignUpSuccess }: CustomSignUpFormProps) {
     });
 
     if (error) {
-      toast.error(error.message);
+      let userFriendlyMessage = 'An unexpected error occurred during sign up.';
+      if (error.message.includes('User already registered')) {
+        userFriendlyMessage = 'An account with this email already exists. Please try logging in or use a different email.';
+      } else if (error.message.includes('unique_mobile_number')) {
+        userFriendlyMessage = 'This mobile number is already registered. Please use a different mobile number.';
+      } else if (error.message.includes('duplicate key value violates unique constraint')) {
+        // Generic unique constraint error, might need to be more specific if multiple unique constraints exist
+        userFriendlyMessage = 'A user with this mobile number or email already exists.';
+      }
+      toast.error(userFriendlyMessage);
     } else if (data.user) {
       toast.success('Sign-up successful! Please check your email to verify your account.');
       form.reset();
-      onSignUpSuccess?.(); // Call callback if provided
-      navigate('/userauth/login'); // Changed router.push to navigate
+      onSignUpSuccess?.();
+      navigate('/userauth/login');
     }
     setIsLoading(false);
   }
