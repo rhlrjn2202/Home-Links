@@ -22,7 +22,7 @@ export function AdminLoginPage() {
             },
           }}
           theme="light"
-          redirectTo={window.location.origin + '/admin/dashboard'}
+          // Removed redirectTo prop to let SessionContextProvider handle all post-login redirects
         />
       </div>
     </div>
