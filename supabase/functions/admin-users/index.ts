@@ -122,6 +122,7 @@ serve(async (req: Request) => {
     // Format users for both JSON and CSV output
     const formattedUsers = nonAdminUsers.map((u: any, index: number) => {
       const userMetadata = u.user_metadata || {};
+      const isBlocked = u.banned_until && new Date(u.banned_until) > new Date();
       return {
         slNo: index + 1, // Serial number for the full list
         id: u.id,
@@ -131,6 +132,7 @@ serve(async (req: Request) => {
         accountCreated: new Date(u.created_at).toLocaleDateString(),
         plan: 'N/A', // Placeholder, as subscription data is not fetched here
         daysLeft: 'N/A', // Placeholder
+        isBlocked: isBlocked, // Include ban status
       };
     });
 
