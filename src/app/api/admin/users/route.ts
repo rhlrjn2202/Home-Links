@@ -7,6 +7,7 @@ export async function GET(request: Request) {
     console.log('API Route: Starting GET request for /api/admin/users');
     console.log('API Route: NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not Set');
     console.log('API Route: NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not Set');
+    console.log('API Route: SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Not Set'); // Log service role key status
 
     // Extract the Authorization header
     const authHeader = request.headers.get('Authorization');
@@ -19,14 +20,12 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized: Access token missing' }, { status: 401 });
     }
 
-    // Initialize Supabase client. We'll use the provided access token directly.
-    // For server-side, we still need to provide cookie handlers, but the primary auth
-    // will come from the token we explicitly set.
-    const cookieStore = await cookies(); // Still need this for potential refresh token handling by Supabase client
-
+    // Initialize Supabase client with the SERVICE_ROLE_KEY for full access
+    // This client is used for fetching all user data, including from auth.users
+    const cookieStore = await cookies(); 
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use the SERVICE_ROLE_KEY here
       {
         cookies: {
           get: (name: string) => cookieStore.get(name)?.value,
@@ -41,7 +40,7 @@ export async function GET(request: Request) {
     );
 
     // Set the session explicitly using the access token from the header
-    // This is crucial for the server-side client to recognize the user
+    // This is crucial for the server-side client to recognize the user making the request
     const { error: setSessionError } = await supabase.auth.setSession({
       access_token: accessToken,
       refresh_token: accessToken, // Supabase client might try to refresh, so provide a placeholder
@@ -52,7 +51,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized: Invalid access token' }, { status: 401 });
     }
 
-    // 1. Check if the user is authenticated
+    // 1. Check if the user is authenticated (using the session set by the access token)
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
     console.log('API Route: User from supabase.auth.getUser():', user ? user.id : 'null');
@@ -95,7 +94,7 @@ export async function GET(request: Request) {
 
     // 3. Fetch user data, profiles, and subscriptions
     const { data: usersData, error: usersError } = await supabase
-      .from('auth.users')
+      .from('auth.users') // This table requires service_role key access
       .select(`
         id,
         email,
