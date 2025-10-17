@@ -67,11 +67,10 @@ export function CustomSignUpForm({ onSignUpSuccess }: CustomSignUpFormProps) {
       let userFriendlyMessage = 'An unexpected error occurred during sign up.';
       if (error.message.includes('User already registered')) {
         userFriendlyMessage = 'An account with this email already exists. Please try logging in or use a different email.';
-      } else if (error.message.includes('unique_mobile_number')) {
+      } else if (error.message.includes('unique_mobile_number') || (error.message.includes('duplicate key value violates unique constraint') && error.message.includes('mobile_number'))) {
         userFriendlyMessage = 'This mobile number is already registered. Please use a different mobile number.';
       } else if (error.message.includes('duplicate key value violates unique constraint')) {
-        // Generic unique constraint error, might need to be more specific if multiple unique constraints exist
-        userFriendlyMessage = 'A user with this mobile number or email already exists.';
+        userFriendlyMessage = 'A user with this email or mobile number already exists.';
       }
       toast.error(userFriendlyMessage);
     } else if (data.user) {
