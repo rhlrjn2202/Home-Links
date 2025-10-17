@@ -1,7 +1,7 @@
 "use client";
 
 import { Link } from 'react-router-dom';
-import { cn } from '@/lib/utils'; // Keep cn as it's used in the Link className
+// import { cn } from '@/lib/utils'; // Removed unused import
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
@@ -10,7 +10,7 @@ import { useSession } from '@/components/auth/SessionContextProvider';
 import { supabase } from '@/integrations/supabase/client';
 
 export function Header() {
-  const { session, loading, isAdmin } = useSession(); // Removed 'user'
+  const { session, loading, isAdmin } = useSession();
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
