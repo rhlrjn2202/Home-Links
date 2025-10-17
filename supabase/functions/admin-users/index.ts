@@ -7,19 +7,6 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
-// Define interfaces for better type safety
-interface AuthUser {
-  id: string;
-  email: string | null;
-  created_at: string;
-}
-
-interface UserProfile {
-  id: string;
-  first_name: string | null;
-  mobile_number: string | null;
-}
-
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -91,53 +78,31 @@ serve(async (req: Request) => {
     const adminUserIds = allAdminProfiles.map((admin: { id: string }) => admin.id);
     console.log('Edge Function: Admin User IDs for filtering:', adminUserIds);
 
-    // Fetch all users from auth.users
-    const { data: authUsers, error: authUsersError } = await supabaseAdmin
-      .from('auth.users')
-      .select('id, email, created_at')
-      .order('created_at', { ascending: true });
+    // --- NEW: Fetch all users using admin.listUsers() ---
+    const { data: { users: authUsers }, error: listUsersError } = await supabaseAdmin.auth.admin.listUsers();
 
-    if (authUsersError) {
-      console.error('Edge Function: Error fetching auth.users:', authUsersError);
+    if (listUsersError) {
+      console.error('Edge Function: Error fetching all users:', listUsersError);
       return new Response(JSON.stringify({ error: 'Failed to fetch base user data' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const userIds = (authUsers as AuthUser[]).map((u: AuthUser) => u.id);
-
-    // Fetch user profiles for these users
-    const { data: userProfiles, error: profilesError } = await supabaseAdmin
-      .from('user_profiles')
-      .select('id, first_name, mobile_number')
-      .in('id', userIds); // Filter profiles by fetched user IDs
-
-    if (profilesError) {
-      console.error('Edge Function: Error fetching user_profiles:', profilesError);
-      return new Response(JSON.stringify({ error: 'Failed to fetch user profiles' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-      });
-    }
-
-    const profilesMap = new Map((userProfiles as UserProfile[]).map((p: UserProfile) => [p.id, p]));
-
     // Process data for the table, filtering out all admin users
-    const formattedUsers = (authUsers as AuthUser[])
-      .filter((u: AuthUser) => !adminUserIds.includes(u.id))
-      .map((u: AuthUser, index: number) => {
-        const profile: UserProfile | undefined = profilesMap.get(u.id);
-
+    const formattedUsers = (authUsers || [])
+      .filter((u: any) => !adminUserIds.includes(u.id))
+      .map((u: any, index: number) => {
+        const userMetadata = u.user_metadata || {};
         return {
           slNo: index + 1,
           id: u.id,
-          name: profile?.first_name || 'N/A',
-          mobileNumber: profile?.mobile_number || 'N/A',
+          name: userMetadata.first_name || 'N/A',
+          mobileNumber: userMetadata.mobile_number || 'N/A',
           email: u.email || 'N/A',
           accountCreated: new Date(u.created_at).toLocaleDateString(),
-          plan: 'N/A',
-          daysLeft: 'N/A',
+          plan: 'N/A', // Still N/A as subscription data is not fetched yet
+          daysLeft: 'N/A', // Still N/A
         };
       });
 
