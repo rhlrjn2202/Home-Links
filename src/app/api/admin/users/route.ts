@@ -1,5 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies } from 'next/headers';
+import { cookies, ReadonlyRequestCookies } from 'next/headers'; // Import ReadonlyRequestCookies
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -17,57 +17,41 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized: Access token missing' }, { status: 401 });
     }
 
-    // Explicitly treat cookies() as a Promise to satisfy TypeScript compiler,
-    // and ensure correct method calls.
-    const cookieStorePromise = Promise.resolve(cookies());
+    // Correctly get the cookieStore instance and explicitly type it
+    const cookieStore: ReadonlyRequestCookies = cookies();
 
-    // 1. Create a Supabase client for the *requesting user's session* (using anon key)
-    // This client will be used to verify the user's identity and admin status.
-    const supabaseUser = createServerClient(
+    // Create a Supabase client with the SERVICE_ROLE_KEY for privileged operations and token verification
+    const supabaseAdmin = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use the SERVICE_ROLE_KEY here
       {
         cookies: {
-          get: async (name: string) => (await cookieStorePromise).get(name)?.value,
-          set: async (name: string, value: string, options: CookieOptions) => {
-            (await cookieStorePromise).set(name, value, options);
+          get: (name: string) => cookieStore.get(name)?.value,
+          set: (name: string, value: string, options: CookieOptions) => {
+            cookieStore.set(name, value, options);
           },
-          remove: async (name: string, options: CookieOptions) => {
-            (await cookieStorePromise).delete(name); // FIX: Use .delete() for next/headers cookies
+          remove: (name: string, options: CookieOptions) => {
+            cookieStore.delete(name);
           },
         },
       }
     );
 
-    // Explicitly set the session for supabaseUser client using the access token
-    const { error: setSessionError } = await supabaseUser.auth.setSession({
-      access_token: accessToken,
-      refresh_token: accessToken, // Placeholder, actual refresh token might not be available here
-    });
+    // Verify the access token using supabaseAdmin.auth.getUser()
+    const { data: { user }, error: tokenVerificationError } = await supabaseAdmin.auth.getUser(accessToken);
 
-    if (setSessionError) {
-      console.error('API Route: Error setting session for user client:', setSessionError);
-      return NextResponse.json({ error: 'Unauthorized: Invalid access token' }, { status: 401 });
+    if (tokenVerificationError || !user) {
+      console.error('API Route: Error verifying access token or user not found:', tokenVerificationError);
+      return NextResponse.json({ error: 'Unauthorized: Invalid or expired access token' }, { status: 401 });
     }
 
-    // Get the user from the session
-    const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
-    
-    console.log('API Route: User from supabaseUser.auth.getUser():', user ? user.id : 'null');
-    if (userError) {
-      console.error('API Route: Error getting user from supabaseUser.auth.getUser():', userError);
-    }
+    console.log('API Route: Verified User ID:', user.id);
 
-    if (!user) {
-      console.log('API Route: No user found after getUser(), returning 401 Unauthorized.');
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
-
-    // 2. Check if the authenticated user is an admin using the supabaseUser client
-    const { data: adminProfile, error: adminError } = await supabaseUser
+    // Now that the user is verified, check if they are an admin.
+    const { data: adminProfile, error: adminError } = await supabaseAdmin
       .from('admin_profiles')
       .select('id')
-      .eq('id', user.id)
+      .eq('id', user.id) // Use the extracted userId
       .single();
 
     console.log('API Route: Admin Profile Check - Data:', adminProfile ? adminProfile.id : 'null');
@@ -78,24 +62,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Forbidden: Not an admin' }, { status: 403 });
     }
 
-    // 3. Create a *separate* Supabase client with the SERVICE_ROLE_KEY for privileged data fetching
-    const supabaseAdmin = createServerClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use the SERVICE_ROLE_KEY here
-      {
-        cookies: {
-          get: async (name: string) => (await cookieStorePromise).get(name)?.value,
-          set: async (name: string, value: string, options: CookieOptions) => {
-            (await cookieStorePromise).set(name, value, options);
-          },
-          remove: async (name: string, options: CookieOptions) => {
-            (await cookieStorePromise).delete(name); // FIX: Use .delete() for next/headers cookies
-          },
-        },
-      }
-    );
-
-    // Fetch all admin user IDs to exclude them from the normal user list using supabaseAdmin
+    // Fetch all admin user IDs to exclude them from the normal user list
     const { data: allAdminProfiles, error: allAdminProfilesError } = await supabaseAdmin
       .from('admin_profiles')
       .select('id');
@@ -108,7 +75,7 @@ export async function GET(request: Request) {
     const adminUserIds = allAdminProfiles.map(admin => admin.id);
     console.log('API Route: Admin User IDs for filtering:', adminUserIds);
 
-    // 4. Fetch user data and profiles using the supabaseAdmin client, excluding subscriptions
+    // Fetch user data and profiles using the supabaseAdmin client
     const { data: usersData, error: usersError } = await supabaseAdmin
       .from('auth.users') // This table requires service_role key access
       .select(`
@@ -127,7 +94,7 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Failed to fetch users from database' }, { status: 500 });
     }
 
-    // 5. Process data for the table, filtering out all admin users
+    // Process data for the table, filtering out all admin users
     const formattedUsers = usersData
       .filter(u => !adminUserIds.includes(u.id)) // Exclude all admin users
       .map((u, index) => {
