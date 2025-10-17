@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from 'react'; // Removed React import
+import { useEffect, useState } from 'react';
 import {
   Table,
   TableBody,
@@ -13,6 +13,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSession } from '@/components/auth/SessionContextProvider';
+// Removed unused import: import { supabase } from '@/integrations/supabase/client';
 
 interface UserData {
   slNo: number;
@@ -46,8 +47,11 @@ export function UserManagementTable() {
         setLoading(true);
         setError(null);
 
-        // This will now call the Supabase Edge Function
-        const response = await fetch('/api/admin/users', { // This path will be handled by the Edge Function
+        // Construct the full Supabase Edge Function URL
+        const SUPABASE_URL = "https://vytctxgktgblnrsznhgw.supabase.co"; // Directly use the project URL
+        const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/admin-users`;
+
+        const response = await fetch(edgeFunctionUrl, {
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
           },
