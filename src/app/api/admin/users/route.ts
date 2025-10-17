@@ -13,15 +13,23 @@ export async function GET(request: Request) {
 
     // Log all cookies received by the API route
     console.log('API Route: All cookies received:');
-    cookieStore.getAll().forEach((cookie: { name: string; value: string }) => {
+    const allCookies = cookieStore.getAll();
+    allCookies.forEach((cookie: { name: string; value: string }) => {
       console.log(`  - ${cookie.name}: ${cookie.value.substring(0, Math.min(cookie.value.length, 20))}...`);
     });
+
+    // Check if specific Supabase cookies are found when iterating all cookies
+    const accessTokenCookieInAll = allCookies.find(c => c.name === 'sb-access-token');
+    const refreshTokenCookieInAll = allCookies.find(c => c.name === 'sb-refresh-token');
+
+    console.log('API Route: Found sb-access-token in getAll():', accessTokenCookieInAll ? 'Yes' : 'No');
+    console.log('API Route: Found sb-refresh-token in getAll():', refreshTokenCookieInAll ? 'Yes' : 'No');
 
     const accessToken = cookieStore.get('sb-access-token')?.value;
     const refreshToken = cookieStore.get('sb-refresh-token')?.value;
 
-    console.log('API Route: sb-access-token value:', accessToken ? accessToken.substring(0, 20) + '...' : 'Missing');
-    console.log('API Route: sb-refresh-token value:', refreshToken ? refreshToken.substring(0, 20) + '...' : 'Missing');
+    console.log('API Route: DEBUG - accessToken from get():', accessToken ? accessToken.substring(0, 20) + '...' : 'Missing');
+    console.log('API Route: DEBUG - refreshToken from get():', refreshToken ? refreshToken.substring(0, 20) + '...' : 'Missing');
 
     // If essential Supabase auth cookies are missing, return unauthorized early
     if (!accessToken || !refreshToken) {
