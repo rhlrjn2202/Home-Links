@@ -1,5 +1,5 @@
 import { createServerClient, type CookieOptions } from '@supabase/ssr';
-import { cookies, ReadonlyRequestCookies } from 'next/headers'; // Import ReadonlyRequestCookies
+import { cookies } from 'next/headers';
 import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
@@ -17,8 +17,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized: Access token missing' }, { status: 401 });
     }
 
-    // Correctly get the cookieStore instance and explicitly type it
-    const cookieStore: ReadonlyRequestCookies = cookies();
+    // Correctly get the cookieStore instance by awaiting cookies()
+    const cookieStore = await cookies();
 
     // Create a Supabase client with the SERVICE_ROLE_KEY for privileged operations and token verification
     const supabaseAdmin = createServerClient(
