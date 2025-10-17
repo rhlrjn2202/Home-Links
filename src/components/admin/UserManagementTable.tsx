@@ -10,10 +10,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button'; // Import Button for pagination
-import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react'; // Import icons for pagination
+import { Button } from '@/components/ui/button';
+import { Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSession } from '@/components/auth/SessionContextProvider';
+import { ExportUsersToCsvButton } from './ExportUsersToCsvButton'; // Import the new component
 
 interface UserData {
   slNo: number;
@@ -26,7 +27,7 @@ interface UserData {
   daysLeft: number | string;
 }
 
-const ITEMS_PER_PAGE = 10; // Default items per page
+const ITEMS_PER_PAGE = 10;
 
 export function UserManagementTable() {
   const { session, loading: sessionLoading } = useSession();
@@ -54,9 +55,8 @@ export function UserManagementTable() {
       const edgeFunctionUrl = new URL(`${SUPABASE_URL}/functions/v1/admin-users`);
       edgeFunctionUrl.searchParams.append('page', currentPage.toString());
       edgeFunctionUrl.searchParams.append('limit', ITEMS_PER_PAGE.toString());
-      // Default sort by created_at in descending order
-      edgeFunctionUrl.searchParams.append('sortBy', 'created_at');
-      edgeFunctionUrl.searchParams.append('sortOrder', 'desc');
+      // The sorting is now handled directly in the Edge Function for both JSON and CSV
+      // No need to append sortBy/sortOrder here for JSON, as the function sorts the full list before slicing.
 
       const response = await fetch(edgeFunctionUrl.toString(), {
         headers: {
@@ -82,7 +82,7 @@ export function UserManagementTable() {
 
   useEffect(() => {
     fetchUsers();
-  }, [session, sessionLoading, currentPage]); // Re-fetch when session or page changes
+  }, [session, sessionLoading, currentPage]);
 
   const totalPages = Math.ceil(totalUsers / ITEMS_PER_PAGE);
 
@@ -115,8 +115,13 @@ export function UserManagementTable() {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Manage Users</CardTitle>
-        <CardDescription>View and manage all registered users.</CardDescription>
+        <div className="flex justify-between items-center mb-4"> {/* Flex container for title and button */}
+          <div>
+            <CardTitle>Manage Users</CardTitle>
+            <CardDescription>View and manage all registered users.</CardDescription>
+          </div>
+          <ExportUsersToCsvButton /> {/* The new CSV export button */}
+        </div>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">

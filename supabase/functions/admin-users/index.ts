@@ -7,6 +7,30 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to convert array of objects to CSV string
+function convertToCsv(data: any[]) {
+  if (data.length === 0) {
+    return '';
+  }
+
+  const headers = Object.keys(data[0]);
+  const csvRows = [];
+
+  // Add header row
+  csvRows.push(headers.join(','));
+
+  // Add data rows
+  for (const row of data) {
+    const values = headers.map(header => {
+      const escaped = ('' + row[header]).replace(/"/g, '""');
+      return `"${escaped}"`;
+    });
+    csvRows.push(values.join(','));
+  }
+
+  return csvRows.join('\n');
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -83,61 +107,60 @@ serve(async (req: Request) => {
       });
     }
 
-    // Filter out admin users
-    const nonAdminUsers = (authUsers || []).filter((u: any) => !adminUserIds.includes(u.id));
-
-    // Sort by created_at (account created date) in descending order
-    nonAdminUsers.sort((a: any, b: any) => {
-      const dateA = new Date(a.created_at).getTime();
-      const dateB = new Date(b.created_at).getTime();
-      return dateB - dateA; // Descending order
-    });
-
-    // Pagination logic
-    const url = new URL(req.url);
-    const page = parseInt(url.searchParams.get('page') || '1');
-    const limit = parseInt(url.searchParams.get('limit') || '10');
-    const startIndex = (page - 1) * limit;
-    const endIndex = startIndex + limit;
-
-    const paginatedUsers = nonAdminUsers.slice(startIndex, endIndex);
-    const totalCount = nonAdminUsers.length;
-
-    // Fetch user profiles for the paginated users
-    const paginatedUserIds = paginatedUsers.map((u: any) => u.id);
-    const { data: userProfiles, error: profilesError } = await supabaseAdmin
-      .from('user_profiles')
-      .select('id, first_name, mobile_number')
-      .in('id', paginatedUserIds);
-
-    if (profilesError) {
-      console.error('Edge Function: Error fetching user_profiles:', profilesError);
-      return new Response(JSON.stringify({ error: 'Failed to fetch user profiles' }), {
-        status: 500,
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    // Filter out admin users and sort by created_at in descending order
+    const nonAdminUsers = (authUsers || [])
+      .filter((u: any) => !adminUserIds.includes(u.id))
+      .sort((a: any, b: any) => {
+        const dateA = new Date(a.created_at).getTime();
+        const dateB = new Date(b.created_at).getTime();
+        return dateB - dateA; // Descending order
       });
-    }
 
-    const profilesMap = new Map(userProfiles.map(p => [p.id, p]));
+    const url = new URL(req.url);
+    const format = url.searchParams.get('format');
 
-    const formattedUsers = paginatedUsers.map((u: any, index: number) => {
-      const profile = profilesMap.get(u.id) || {};
+    // Format users for both JSON and CSV output
+    const formattedUsers = nonAdminUsers.map((u: any, index: number) => {
+      const userMetadata = u.user_metadata || {};
       return {
-        slNo: startIndex + index + 1, // Correct serial number for current page
+        slNo: index + 1, // Serial number for the full list
         id: u.id,
-        name: profile.first_name || 'N/A',
-        mobileNumber: profile.mobile_number || 'N/A',
+        name: userMetadata.first_name || 'N/A',
+        mobileNumber: userMetadata.mobile_number || 'N/A',
         email: u.email || 'N/A',
         accountCreated: new Date(u.created_at).toLocaleDateString(),
-        plan: 'N/A',
-        daysLeft: 'N/A',
+        plan: 'N/A', // Placeholder, as subscription data is not fetched here
+        daysLeft: 'N/A', // Placeholder
       };
     });
 
-    return new Response(JSON.stringify({ users: formattedUsers, totalCount }), {
-      status: 200,
-      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-    });
+    if (format === 'csv') {
+      console.log('Edge Function: Generating CSV for all non-admin users.');
+      const csv = convertToCsv(formattedUsers);
+      return new Response(csv, {
+        status: 200,
+        headers: {
+          ...corsHeaders,
+          'Content-Type': 'text/csv',
+          'Content-Disposition': `attachment; filename="users_export_${new Date().toISOString().slice(0, 10)}.csv"`,
+        },
+      });
+    } else {
+      // Existing pagination logic for JSON response
+      const page = parseInt(url.searchParams.get('page') || '1');
+      const limit = parseInt(url.searchParams.get('limit') || '10');
+      const startIndex = (page - 1) * limit;
+      const endIndex = startIndex + limit;
+
+      const paginatedUsers = formattedUsers.slice(startIndex, endIndex);
+      const totalCount = nonAdminUsers.length; // Total count of non-admin users
+
+      console.log('Edge Function: Returning paginated JSON data.');
+      return new Response(JSON.stringify({ users: paginatedUsers, totalCount }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
   } catch (error) {
     console.error('Edge Function: Unhandled error:', error);
     return new Response(JSON.stringify({ error: 'Internal Server Error' }), {
