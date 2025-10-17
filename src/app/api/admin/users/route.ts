@@ -7,56 +7,55 @@ export async function GET(request: Request) {
     console.log('API Route: Starting GET request for /api/admin/users');
     console.log('API Route: NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not Set');
     console.log('API Route: NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not Set');
-    console.log('API Route: SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Not Set'); // Log service role key status
+    console.log('API Route: SUPABASE_SERVICE_ROLE_KEY:', process.env.SUPABASE_SERVICE_ROLE_KEY ? 'Set' : 'Not Set');
 
-    // Extract the Authorization header
     const authHeader = request.headers.get('Authorization');
     const accessToken = authHeader?.replace('Bearer ', '');
-
-    console.log('API Route: Access Token from Authorization header:', accessToken ? accessToken.substring(0, 20) + '...' : 'Missing');
 
     if (!accessToken) {
       console.log('API Route: No access token found in Authorization header, returning 401 Unauthorized.');
       return NextResponse.json({ error: 'Unauthorized: Access token missing' }, { status: 401 });
     }
 
-    // Initialize Supabase client with the SERVICE_ROLE_KEY for full access
-    // This client is used for fetching all user data, including from auth.users
-    const cookieStore = await cookies(); 
-    const supabase = createServerClient(
+    // Explicitly treat cookies() as a Promise to satisfy TypeScript compiler,
+    // and ensure correct method calls.
+    const cookieStorePromise = Promise.resolve(cookies());
+
+    // 1. Create a Supabase client for the *requesting user's session* (using anon key)
+    // This client will be used to verify the user's identity and admin status.
+    const supabaseUser = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use the SERVICE_ROLE_KEY here
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          get: (name: string) => cookieStore.get(name)?.value,
-          set: (name: string, value: string, options: CookieOptions) => {
-            cookieStore.set(name, value, options);
+          get: async (name: string) => (await cookieStorePromise).get(name)?.value,
+          set: async (name: string, value: string, options: CookieOptions) => {
+            (await cookieStorePromise).set(name, value, options);
           },
-          remove: (name: string, options: CookieOptions) => {
-            cookieStore.set(name, '', options);
+          remove: async (name: string, options: CookieOptions) => {
+            (await cookieStorePromise).delete(name); // FIX: Use .delete() for next/headers cookies
           },
         },
       }
     );
 
-    // Set the session explicitly using the access token from the header
-    // This is crucial for the server-side client to recognize the user making the request
-    const { error: setSessionError } = await supabase.auth.setSession({
+    // Explicitly set the session for supabaseUser client using the access token
+    const { error: setSessionError } = await supabaseUser.auth.setSession({
       access_token: accessToken,
-      refresh_token: accessToken, // Supabase client might try to refresh, so provide a placeholder
+      refresh_token: accessToken, // Placeholder, actual refresh token might not be available here
     });
 
     if (setSessionError) {
-      console.error('API Route: Error setting session with provided access token:', setSessionError);
+      console.error('API Route: Error setting session for user client:', setSessionError);
       return NextResponse.json({ error: 'Unauthorized: Invalid access token' }, { status: 401 });
     }
 
-    // 1. Check if the user is authenticated (using the session set by the access token)
-    const { data: { user }, error: userError } = await supabase.auth.getUser();
+    // Get the user from the session
+    const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
     
-    console.log('API Route: User from supabase.auth.getUser():', user ? user.id : 'null');
+    console.log('API Route: User from supabaseUser.auth.getUser():', user ? user.id : 'null');
     if (userError) {
-      console.error('API Route: Error getting user from supabase.auth.getUser():', userError);
+      console.error('API Route: Error getting user from supabaseUser.auth.getUser():', userError);
     }
 
     if (!user) {
@@ -64,8 +63,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // 2. Check if the authenticated user is an admin
-    const { data: adminProfile, error: adminError } = await supabase
+    // 2. Check if the authenticated user is an admin using the supabaseUser client
+    const { data: adminProfile, error: adminError } = await supabaseUser
       .from('admin_profiles')
       .select('id')
       .eq('id', user.id)
@@ -79,21 +78,38 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Forbidden: Not an admin' }, { status: 403 });
     }
 
-    // Fetch all admin user IDs to exclude them from the normal user list
-    const { data: allAdminProfiles, error: allAdminProfilesError } = await supabase
+    // 3. Create a *separate* Supabase client with the SERVICE_ROLE_KEY for privileged data fetching
+    const supabaseAdmin = createServerClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!, // Use the SERVICE_ROLE_KEY here
+      {
+        cookies: {
+          get: async (name: string) => (await cookieStorePromise).get(name)?.value,
+          set: async (name: string, value: string, options: CookieOptions) => {
+            (await cookieStorePromise).set(name, value, options);
+          },
+          remove: async (name: string, options: CookieOptions) => {
+            (await cookieStorePromise).delete(name); // FIX: Use .delete() for next/headers cookies
+          },
+        },
+      }
+    );
+
+    // Fetch all admin user IDs to exclude them from the normal user list using supabaseAdmin
+    const { data: allAdminProfiles, error: allAdminProfilesError } = await supabaseAdmin
       .from('admin_profiles')
       .select('id');
 
     if (allAdminProfilesError) {
-      console.error('API Route: Error fetching all admin profiles for filtering:', allAdminProfilesError);
+      console.error('API Route: Error fetching all admin profiles for filtering with supabaseAdmin:', allAdminProfilesError);
       return NextResponse.json({ error: 'Failed to fetch admin profiles for filtering' }, { status: 500 });
     }
 
     const adminUserIds = allAdminProfiles.map(admin => admin.id);
     console.log('API Route: Admin User IDs for filtering:', adminUserIds);
 
-    // 3. Fetch user data, profiles, and subscriptions
-    const { data: usersData, error: usersError } = await supabase
+    // 4. Fetch user data, profiles, and subscriptions using the supabaseAdmin client
+    const { data: usersData, error: usersError } = await supabaseAdmin
       .from('auth.users') // This table requires service_role key access
       .select(`
         id,
@@ -111,11 +127,11 @@ export async function GET(request: Request) {
       .order('created_at', { ascending: true });
 
     if (usersError) {
-      console.error('API Route: Error fetching users from Supabase:', usersError);
+      console.error('API Route: Error fetching users from Supabase with supabaseAdmin:', usersError);
       return NextResponse.json({ error: 'Failed to fetch users from database' }, { status: 500 });
     }
 
-    // 4. Process data for the table, filtering out all admin users
+    // 5. Process data for the table, filtering out all admin users
     const formattedUsers = usersData
       .filter(u => !adminUserIds.includes(u.id)) // Exclude all admin users
       .map((u, index) => {
