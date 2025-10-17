@@ -1,7 +1,7 @@
 import { HeroSection } from '@/components/home/HeroSection';
 import { PropertyCategories } from '@/components/home/PropertyCategories';
 import { TopPickedProperties } from '@/components/home/TopPickedProperties';
-import { MadeWithDyad } from '@/components/made-with-dyad';
+// MadeWithDyad import removed
 
 export function HomePage() {
   return (
@@ -9,7 +9,7 @@ export function HomePage() {
       <HeroSection />
       <PropertyCategories />
       <TopPickedProperties />
-      <MadeWithDyad />
+      {/* MadeWithDyad component removed */}
     </>
   );
 }
