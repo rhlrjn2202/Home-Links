@@ -8,48 +8,49 @@ export async function GET(request: Request) {
     console.log('API Route: NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not Set');
     console.log('API Route: NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not Set');
 
-    const cookieStore = await cookies();
+    // Extract the Authorization header
+    const authHeader = request.headers.get('Authorization');
+    const accessToken = authHeader?.replace('Bearer ', '');
 
-    console.log('API Route: All cookies received (from cookieStore.getAll()):');
-    const allCookies = cookieStore.getAll();
-    allCookies.forEach((cookie: { name: string; value: string }) => {
-      console.log(`  - ${cookie.name}: ${cookie.value.substring(0, Math.min(cookie.value.length, 20))}...`);
-    });
+    console.log('API Route: Access Token from Authorization header:', accessToken ? accessToken.substring(0, 20) + '...' : 'Missing');
 
-    const accessToken = cookieStore.get('sb-access-token')?.value;
-    const refreshToken = cookieStore.get('sb-refresh-token')?.value;
-
-    console.log('API Route: DEBUG - accessToken from cookieStore.get():', accessToken ? accessToken.substring(0, 20) + '...' : 'Missing');
-    console.log('API Route: DEBUG - refreshToken from cookieStore.get():', refreshToken ? refreshToken.substring(0, 20) + '...' : 'Missing');
-
-    // If essential Supabase auth cookies are missing, return unauthorized early
-    if (!accessToken || !refreshToken) {
-      console.log('API Route: Supabase auth cookies (access or refresh token) missing, returning 401 Unauthorized.');
-      return NextResponse.json({ error: 'Unauthorized: Supabase auth cookies missing' }, { status: 401 });
+    if (!accessToken) {
+      console.log('API Route: No access token found in Authorization header, returning 401 Unauthorized.');
+      return NextResponse.json({ error: 'Unauthorized: Access token missing' }, { status: 401 });
     }
 
-    // Initialize Supabase client with explicit cookie handlers
+    // Initialize Supabase client. We'll use the provided access token directly.
+    // For server-side, we still need to provide cookie handlers, but the primary auth
+    // will come from the token we explicitly set.
+    const cookieStore = await cookies(); // Still need this for potential refresh token handling by Supabase client
+
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          get: (name: string) => {
-            const value = cookieStore.get(name)?.value;
-            console.log(`API Route: Supabase client cookie.get('${name}'):`, value ? value.substring(0, 20) + '...' : 'Missing');
-            return value;
-          },
+          get: (name: string) => cookieStore.get(name)?.value,
           set: (name: string, value: string, options: CookieOptions) => {
-            console.log(`API Route: Supabase client cookie.set('${name}'): Setting value (first 20 chars): ${value ? value.substring(0, 20) + '...' : 'Empty'}`);
             cookieStore.set(name, value, options);
           },
           remove: (name: string, options: CookieOptions) => {
-            console.log(`API Route: Supabase client cookie.remove('${name}'): Removing`);
             cookieStore.set(name, '', options);
           },
         },
       }
     );
+
+    // Set the session explicitly using the access token from the header
+    // This is crucial for the server-side client to recognize the user
+    const { error: setSessionError } = await supabase.auth.setSession({
+      access_token: accessToken,
+      refresh_token: accessToken, // Supabase client might try to refresh, so provide a placeholder
+    });
+
+    if (setSessionError) {
+      console.error('API Route: Error setting session with provided access token:', setSessionError);
+      return NextResponse.json({ error: 'Unauthorized: Invalid access token' }, { status: 401 });
+    }
 
     // 1. Check if the user is authenticated
     const { data: { user }, error: userError } = await supabase.auth.getUser();

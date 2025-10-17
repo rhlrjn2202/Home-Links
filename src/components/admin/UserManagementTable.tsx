@@ -12,6 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
 
 interface UserData {
   slNo: number;
@@ -25,15 +26,32 @@ interface UserData {
 }
 
 export function UserManagementTable() {
+  const { session, loading: sessionLoading } = useSession(); // Get session and sessionLoading
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
+      if (sessionLoading) return; // Wait for session to load
+
+      if (!session?.access_token) {
+        setError('Authentication session not available. Please log in again.');
+        setLoading(false);
+        toast.error('Authentication required to view user data.');
+        return;
+      }
+
       try {
         setLoading(true);
-        const response = await fetch('/api/admin/users');
+        setError(null); // Clear previous errors
+
+        const response = await fetch('/api/admin/users', {
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`, // Send access token in header
+          },
+        });
+
         if (!response.ok) {
           const errorData = await response.json();
           throw new Error(errorData.error || 'Failed to fetch users');
@@ -50,9 +68,9 @@ export function UserManagementTable() {
     };
 
     fetchUsers();
-  }, []);
+  }, [session, sessionLoading]); // Re-run when session or sessionLoading changes
 
-  if (loading) {
+  if (loading || sessionLoading) {
     return (
       <div className="flex items-center justify-center p-8">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
