@@ -4,32 +4,23 @@ import { NextResponse } from 'next/server';
 
 export async function GET(request: Request) {
   try {
-    // Log environment variables to confirm they are loaded
+    console.log('API Route: Starting GET request for /api/admin/users');
     console.log('API Route: NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not Set');
     console.log('API Route: NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not Set');
 
-    // Explicitly await cookies() to ensure we're working with the resolved ReadonlyRequestCookies object
     const cookieStore = await cookies();
 
-    // Log all cookies received by the API route
-    console.log('API Route: All cookies received:');
+    console.log('API Route: All cookies received (from cookieStore.getAll()):');
     const allCookies = cookieStore.getAll();
     allCookies.forEach((cookie: { name: string; value: string }) => {
       console.log(`  - ${cookie.name}: ${cookie.value.substring(0, Math.min(cookie.value.length, 20))}...`);
     });
 
-    // Check if specific Supabase cookies are found when iterating all cookies
-    const accessTokenCookieInAll = allCookies.find(c => c.name === 'sb-access-token');
-    const refreshTokenCookieInAll = allCookies.find(c => c.name === 'sb-refresh-token');
-
-    console.log('API Route: Found sb-access-token in getAll():', accessTokenCookieInAll ? 'Yes' : 'No');
-    console.log('API Route: Found sb-refresh-token in getAll():', refreshTokenCookieInAll ? 'Yes' : 'No');
-
     const accessToken = cookieStore.get('sb-access-token')?.value;
     const refreshToken = cookieStore.get('sb-refresh-token')?.value;
 
-    console.log('API Route: DEBUG - accessToken from get():', accessToken ? accessToken.substring(0, 20) + '...' : 'Missing');
-    console.log('API Route: DEBUG - refreshToken from get():', refreshToken ? refreshToken.substring(0, 20) + '...' : 'Missing');
+    console.log('API Route: DEBUG - accessToken from cookieStore.get():', accessToken ? accessToken.substring(0, 20) + '...' : 'Missing');
+    console.log('API Route: DEBUG - refreshToken from cookieStore.get():', refreshToken ? refreshToken.substring(0, 20) + '...' : 'Missing');
 
     // If essential Supabase auth cookies are missing, return unauthorized early
     if (!accessToken || !refreshToken) {
@@ -37,17 +28,23 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: 'Unauthorized: Supabase auth cookies missing' }, { status: 401 });
     }
 
+    // Initialize Supabase client with explicit cookie handlers
     const supabase = createServerClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
       {
         cookies: {
-          // These handlers must be synchronous and use the already-awaited cookieStore
-          get: (name: string) => cookieStore.get(name)?.value,
+          get: (name: string) => {
+            const value = cookieStore.get(name)?.value;
+            console.log(`API Route: Supabase client cookie.get('${name}'):`, value ? value.substring(0, 20) + '...' : 'Missing');
+            return value;
+          },
           set: (name: string, value: string, options: CookieOptions) => {
+            console.log(`API Route: Supabase client cookie.set('${name}'): Setting value (first 20 chars): ${value ? value.substring(0, 20) + '...' : 'Empty'}`);
             cookieStore.set(name, value, options);
           },
           remove: (name: string, options: CookieOptions) => {
+            console.log(`API Route: Supabase client cookie.remove('${name}'): Removing`);
             cookieStore.set(name, '', options);
           },
         },
@@ -57,9 +54,9 @@ export async function GET(request: Request) {
     // 1. Check if the user is authenticated
     const { data: { user }, error: userError } = await supabase.auth.getUser();
     
-    console.log('API Route: User from supabase.auth.getUser():', user);
+    console.log('API Route: User from supabase.auth.getUser():', user ? user.id : 'null');
     if (userError) {
-      console.error('API Route: Error getting user:', userError);
+      console.error('API Route: Error getting user from supabase.auth.getUser():', userError);
     }
 
     if (!user) {
@@ -74,7 +71,7 @@ export async function GET(request: Request) {
       .eq('id', user.id)
       .single();
 
-    console.log('API Route: Admin Profile Check - Data:', adminProfile);
+    console.log('API Route: Admin Profile Check - Data:', adminProfile ? adminProfile.id : 'null');
     console.log('API Route: Admin Profile Check - Error:', adminError);
 
     if (adminError || !adminProfile) {
@@ -93,6 +90,7 @@ export async function GET(request: Request) {
     }
 
     const adminUserIds = allAdminProfiles.map(admin => admin.id);
+    console.log('API Route: Admin User IDs for filtering:', adminUserIds);
 
     // 3. Fetch user data, profiles, and subscriptions
     const { data: usersData, error: usersError } = await supabase
@@ -144,6 +142,7 @@ export async function GET(request: Request) {
         };
       });
 
+    console.log('API Route: Successfully fetched and formatted users.');
     return NextResponse.json(formattedUsers);
   } catch (error) {
     console.error('API Route: Unhandled error in /api/admin/users:', error);
