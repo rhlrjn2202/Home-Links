@@ -8,23 +8,25 @@ export async function GET(request: Request) {
     console.log('API Route: NEXT_PUBLIC_SUPABASE_URL:', process.env.NEXT_PUBLIC_SUPABASE_URL ? 'Set' : 'Not Set');
     console.log('API Route: NEXT_PUBLIC_SUPABASE_ANON_KEY:', process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY ? 'Set' : 'Not Set');
 
-    // Await cookies() to ensure we're working with the resolved ReadonlyRequestCookies object
-    const cookieStore = await cookies(); 
+    // Explicitly await cookies() to ensure we're working with the resolved ReadonlyRequestCookies object
+    const cookieStore = await cookies();
 
     // Log all cookies received by the API route
     console.log('API Route: All cookies received:');
     cookieStore.getAll().forEach((cookie: { name: string; value: string }) => {
-      console.log(`  - ${cookie.name}: ${cookie.value.substring(0, Math.min(cookie.value.length, 10))}...`);
+      console.log(`  - ${cookie.name}: ${cookie.value.substring(0, Math.min(cookie.value.length, 20))}...`);
     });
 
-    // Log specific Supabase cookies for debugging
-    console.log('API Route: sb-access-token:', cookieStore.get('sb-access-token')?.value ? 'Present' : 'Missing');
-    console.log('API Route: sb-refresh-token:', cookieStore.get('sb-refresh-token')?.value ? 'Present' : 'Missing');
-    if (cookieStore.get('sb-access-token')?.value) {
-      console.log('API Route: sb-access-token value (first 20 chars):', cookieStore.get('sb-access-token')?.value?.substring(0, 20));
-    }
-    if (cookieStore.get('sb-refresh-token')?.value) {
-      console.log('API Route: sb-refresh-token value (first 20 chars):', cookieStore.get('sb-refresh-token')?.value?.substring(0, 20));
+    const accessToken = cookieStore.get('sb-access-token')?.value;
+    const refreshToken = cookieStore.get('sb-refresh-token')?.value;
+
+    console.log('API Route: sb-access-token value:', accessToken ? accessToken.substring(0, 20) + '...' : 'Missing');
+    console.log('API Route: sb-refresh-token value:', refreshToken ? refreshToken.substring(0, 20) + '...' : 'Missing');
+
+    // If essential Supabase auth cookies are missing, return unauthorized early
+    if (!accessToken || !refreshToken) {
+      console.log('API Route: Supabase auth cookies (access or refresh token) missing, returning 401 Unauthorized.');
+      return NextResponse.json({ error: 'Unauthorized: Supabase auth cookies missing' }, { status: 401 });
     }
 
     const supabase = createServerClient(
@@ -53,7 +55,7 @@ export async function GET(request: Request) {
     }
 
     if (!user) {
-      console.log('API Route: No user found, returning 401 Unauthorized.');
+      console.log('API Route: No user found after getUser(), returning 401 Unauthorized.');
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
