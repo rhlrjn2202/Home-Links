@@ -1,17 +1,16 @@
 "use client";
 
-import React from 'react';
-import Link from 'next/link';
-import { cn } from '@/lib/utils';
+import { Link } from 'react-router-dom';
+import { cn } from '@/lib/utils'; // Keep cn as it's used in the Link className
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Menu } from 'lucide-react';
-import { SubmitPropertyButton } from '@/components/SubmitPropertyButton'; // Import the new component
-import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
-import { supabase } from '@/integrations/supabase/client'; // Import supabase client
+import { SubmitPropertyButton } from '@/components/SubmitPropertyButton';
+import { useSession } from '@/components/auth/SessionContextProvider';
+import { supabase } from '@/integrations/supabase/client';
 
 export function Header() {
-  const { session, user, loading, isAdmin } = useSession();
+  const { session, loading, isAdmin } = useSession(); // Removed 'user'
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -20,7 +19,7 @@ export function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
       <div className="container flex h-14 items-center px-4 sm:px-6 lg:px-8">
-        <Link href="/" className="mr-6 flex items-center space-x-2">
+        <Link to="/" className="mr-6 flex items-center space-x-2">
           <span className="font-bold text-xl">Home Links</span>
         </Link>
 
@@ -34,14 +33,14 @@ export function Header() {
               <>
                 {isAdmin && (
                   <Button asChild variant="ghost">
-                    <Link href="/admin/dashboard">Admin</Link>
+                    <Link to="/admin/dashboard">Admin</Link>
                   </Button>
                 )}
                 <Button onClick={handleLogout}>Logout</Button>
               </>
             ) : (
               <Button asChild>
-                <Link href="/userauth/login">Login</Link>
+                <Link to="/userauth/login">Login</Link>
               </Button>
             )}
           </nav>
@@ -63,14 +62,14 @@ export function Header() {
                   <>
                     {isAdmin && (
                       <Button asChild variant="ghost" className="w-full">
-                        <Link href="/admin/dashboard">Admin</Link>
+                        <Link to="/admin/dashboard">Admin</Link>
                       </Button>
                     )}
                     <Button onClick={handleLogout} className="w-full">Logout</Button>
                   </>
                 ) : (
                   <Button asChild className="w-full">
-                    <Link href="/userauth/login">Login</Link>
+                    <Link to="/userauth/login">Login</Link>
                   </Button>
                 )}
               </div>

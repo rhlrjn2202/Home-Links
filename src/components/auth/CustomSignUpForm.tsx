@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState } from 'react'; // Removed React import
+import { useNavigate } from 'react-router-dom'; // Changed from next/navigation
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -35,7 +35,7 @@ interface CustomSignUpFormProps {
 }
 
 export function CustomSignUpForm({ onSignUpSuccess }: CustomSignUpFormProps) {
-  const router = useRouter();
+  const navigate = useNavigate(); // Changed from useRouter
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<SignUpFormValues>({
@@ -69,7 +69,7 @@ export function CustomSignUpForm({ onSignUpSuccess }: CustomSignUpFormProps) {
       toast.success('Sign-up successful! Please check your email to verify your account.');
       form.reset();
       onSignUpSuccess?.(); // Call callback if provided
-      router.push('/userauth/login'); // Redirect to login after successful sign-up
+      navigate('/userauth/login'); // Changed router.push to navigate
     }
     setIsLoading(false);
   }

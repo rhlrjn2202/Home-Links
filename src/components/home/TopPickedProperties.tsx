@@ -1,6 +1,5 @@
 "use client";
 
-import React from 'react';
 import { PropertyCard } from '@/components/properties/PropertyCard';
 import type { PropertyCardProps } from '@/components/properties/PropertyCard';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -66,7 +65,7 @@ export function TopPickedProperties() {
     },
   ];
 
-  const propertiesToShow = allProperties.slice(0, 4); // Changed to show only 4 properties
+  const propertiesToShow = allProperties.slice(0, 4);
 
   return (
     <section className="py-12 md:py-20 w-full">
@@ -87,7 +86,7 @@ export function TopPickedProperties() {
             >
               <CarouselContent className="-ml-4 px-6 md:px-8">
                 {propertiesToShow.map((property, index) => (
-                  <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/4 xl:basis-1/4"> {/* Adjusted basis classes */}
+                  <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/4 xl:basis-1/4">
                     <PropertyCard {...property} index={index + 1} />
                   </CarouselItem>
                 ))}

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react'; // Removed React import
 import {
   Table,
   TableBody,
@@ -12,7 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
+import { useSession } from '@/components/auth/SessionContextProvider';
 
 interface UserData {
   slNo: number;
@@ -26,14 +26,14 @@ interface UserData {
 }
 
 export function UserManagementTable() {
-  const { session, loading: sessionLoading } = useSession(); // Get session and sessionLoading
+  const { session, loading: sessionLoading } = useSession();
   const [users, setUsers] = useState<UserData[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchUsers = async () => {
-      if (sessionLoading) return; // Wait for session to load
+      if (sessionLoading) return;
 
       if (!session?.access_token) {
         setError('Authentication session not available. Please log in again.');
@@ -44,11 +44,12 @@ export function UserManagementTable() {
 
       try {
         setLoading(true);
-        setError(null); // Clear previous errors
+        setError(null);
 
-        const response = await fetch('/api/admin/users', {
+        // This will now call the Supabase Edge Function
+        const response = await fetch('/api/admin/users', { // This path will be handled by the Edge Function
           headers: {
-            'Authorization': `Bearer ${session.access_token}`, // Send access token in header
+            'Authorization': `Bearer ${session.access_token}`,
           },
         });
 
@@ -68,7 +69,7 @@ export function UserManagementTable() {
     };
 
     fetchUsers();
-  }, [session, sessionLoading]); // Re-run when session or sessionLoading changes
+  }, [session, sessionLoading]);
 
   if (loading || sessionLoading) {
     return (

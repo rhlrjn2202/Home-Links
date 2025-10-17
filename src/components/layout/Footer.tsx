@@ -1,18 +1,17 @@
 "use client";
 
-import React from 'react';
-import Link from 'next/link';
+import { Link } from 'react-router-dom';
 import { Facebook, Twitter, Instagram, Linkedin, Youtube } from 'lucide-react';
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
 
   const navLinks = [
-    { name: "About Us", href: "/about" },
-    { name: "Careers", href: "/careers" },
-    { name: "Terms & Conditions", href: "/terms" },
-    { name: "Privacy Policy", href: "/privacy" },
-    { name: "Sitemap", href: "/sitemap" },
+    { name: "About Us", to: "/about" },
+    { name: "Careers", to: "/careers" },
+    { name: "Terms & Conditions", to: "/terms" },
+    { name: "Privacy Policy", to: "/privacy" },
+    { name: "Sitemap", to: "/sitemap" },
   ];
 
   const socialLinks = [
@@ -31,7 +30,7 @@ export function Footer() {
           <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 text-sm md:text-base">
             {navLinks.map((link) => (
               <li key={link.name}>
-                <Link href={link.href} className="hover:text-gray-300 transition-colors">
+                <Link to={link.to} className="hover:text-gray-300 transition-colors">
                   {link.name}
                 </Link>
               </li>

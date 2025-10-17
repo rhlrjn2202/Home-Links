@@ -1,28 +1,24 @@
 "use client";
 
-import React from 'react';
-import Link from 'next/link';
-import Image from 'next/image';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Home, Building, LandPlot } from 'lucide-react';
 
 interface CategoryCardProps {
   title: string;
   icon: React.ElementType;
-  href: string;
-  imageSrc: string; // Added imageSrc for background image
+  to: string;
+  imageSrc: string;
 }
 
-function CategoryCard({ title, icon: Icon, href, imageSrc }: CategoryCardProps) {
+function CategoryCard({ title, icon: Icon, to, imageSrc }: CategoryCardProps) {
   return (
-    <Link href={href} className="block">
+    <Link to={to} className="block">
       <Card className="relative w-full h-48 overflow-hidden group hover:shadow-xl transition-shadow duration-300">
-        <Image
+        <img
           src={imageSrc}
           alt={title}
-          layout="fill"
-          objectFit="cover"
-          className="absolute inset-0 w-full h-full transition-transform duration-300 group-hover:scale-105"
+          className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-black/50 group-hover:bg-black/60 transition-colors duration-300 flex flex-col items-center justify-center text-white p-4">
           <Icon className="h-10 w-10 mb-2" />
@@ -38,27 +34,27 @@ export function PropertyCategories() {
     {
       title: "Apartments",
       icon: Building,
-      href: "/properties?category=apartment",
-      imageSrc: "/images/category-apartment.jpg", // Placeholder image
+      to: "/properties?category=apartment",
+      imageSrc: "/images/category-apartment.jpg",
     },
     {
       title: "Houses",
       icon: Home,
-      href: "/properties?category=house",
-      imageSrc: "/images/category-house.jpg", // Placeholder image
+      to: "/properties?category=house",
+      imageSrc: "/images/category-house.jpg",
     },
     {
       title: "Land/Plots",
       icon: LandPlot,
-      href: "/properties?category=land",
-      imageSrc: "/images/category-land.jpg", // Placeholder image
+      to: "/properties?category=land",
+      imageSrc: "/images/category-land.jpg",
     },
   ];
 
   return (
-    <section className="py-12 md:py-20 w-full"> {/* Removed 'container' from section */}
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8"> {/* New wrapper div for centering content */}
-        <Card className="p-6 md:p-8 shadow-lg max-w-4xl mx-auto"> {/* Card is now explicitly centered within the new container div */}
+    <section className="py-12 md:py-20 w-full">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+        <Card className="p-6 md:p-8 shadow-lg max-w-4xl mx-auto">
           <CardHeader className="px-0 pt-0 pb-4 text-center md:text-left">
             <CardTitle className="text-3xl md:text-4xl font-bold mb-2">Explore by Property Type</CardTitle>
             <CardDescription className="text-lg text-muted-foreground max-w-3xl mx-auto md:mx-0">

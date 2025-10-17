@@ -1,7 +1,5 @@
 "use client";
 
-import React from 'react';
-import Image from 'next/image';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,12 +18,10 @@ export function PropertyCard({ imageSrc, title, location, price, type, transacti
   return (
     <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
       <div className="relative h-48 w-full">
-        <Image
+        <img
           src={imageSrc}
           alt={title}
-          layout="fill"
-          objectFit="cover"
-          className="rounded-t-lg"
+          className="rounded-t-lg absolute inset-0 w-full h-full object-cover"
         />
         {index !== undefined && (
           <div className="absolute top-2 left-2 text-5xl font-extrabold text-white/70 drop-shadow-lg">
@@ -46,7 +42,7 @@ export function PropertyCard({ imageSrc, title, location, price, type, transacti
         </CardDescription>
       </CardHeader>
       <CardContent className="pb-4">
-        <p className="text-xl font-bold text-price-accent">{price}</p> {/* Using new price-accent color */}
+        <p className="text-xl font-bold text-price-accent">{price}</p>
       </CardContent>
       <CardFooter>
         <Button className="w-full">View Details</Button>
