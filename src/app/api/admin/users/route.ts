@@ -108,7 +108,7 @@ export async function GET(request: Request) {
     const adminUserIds = allAdminProfiles.map(admin => admin.id);
     console.log('API Route: Admin User IDs for filtering:', adminUserIds);
 
-    // 4. Fetch user data, profiles, and subscriptions using the supabaseAdmin client
+    // 4. Fetch user data and profiles using the supabaseAdmin client, excluding subscriptions
     const { data: usersData, error: usersError } = await supabaseAdmin
       .from('auth.users') // This table requires service_role key access
       .select(`
@@ -118,10 +118,6 @@ export async function GET(request: Request) {
         user_profiles (
           first_name,
           mobile_number
-        ),
-        user_subscriptions (
-          plan_name,
-          expires_at
         )
       `)
       .order('created_at', { ascending: true });
@@ -136,15 +132,6 @@ export async function GET(request: Request) {
       .filter(u => !adminUserIds.includes(u.id)) // Exclude all admin users
       .map((u, index) => {
         const profile = u.user_profiles?.[0] || {}; // Assuming one profile per user
-        const subscription = u.user_subscriptions?.[0] || {}; // Assuming one active subscription per user
-
-        let daysLeft = null;
-        if (subscription.expires_at) {
-          const expiryDate = new Date(subscription.expires_at);
-          const now = new Date();
-          const diffTime = expiryDate.getTime() - now.getTime();
-          daysLeft = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        }
 
         return {
           slNo: index + 1,
@@ -153,8 +140,8 @@ export async function GET(request: Request) {
           mobileNumber: profile.mobile_number || 'N/A',
           email: u.email || 'N/A',
           accountCreated: new Date(u.created_at).toLocaleDateString(),
-          plan: subscription.plan_name || 'Free',
-          daysLeft: daysLeft !== null ? (daysLeft > 0 ? daysLeft : 'Expired') : 'N/A',
+          plan: 'N/A', // Set to N/A as subscriptions are not fetched
+          daysLeft: 'N/A', // Set to N/A as subscriptions are not fetched
         };
       });
 
