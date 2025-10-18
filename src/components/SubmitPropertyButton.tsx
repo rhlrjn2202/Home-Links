@@ -14,7 +14,7 @@ export function SubmitPropertyButton() {
       "h-9 px-4 py-2"
     )}>
       <span>Submit Property</span>
-      <Badge className="ml-2 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full">FREE</Badge>
+      <Badge className="ml-2 bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">FREE</Badge>
     </Link>
   );
 }
