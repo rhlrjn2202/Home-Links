@@ -52,34 +52,56 @@ export function CustomSignUpForm({ onSignUpSuccess }: CustomSignUpFormProps) {
     setIsLoading(true);
     const { email, password, firstName, mobileNumber } = values;
 
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          first_name: firstName,
-          mobile_number: mobileNumber,
-        },
-      },
-    });
+    try {
+      // First, check if the mobile number already exists in user_profiles
+      const { data: existingProfile, error: profileError } = await supabase
+        .from('user_profiles')
+        .select('id')
+        .eq('mobile_number', mobileNumber)
+        .single();
 
-    if (error) {
-      let userFriendlyMessage = 'An unexpected error occurred during sign up.';
-      if (error.message.includes('User already registered')) {
-        userFriendlyMessage = 'An account with this email already exists. Please try logging in or use a different email.';
-      } else if (error.message.includes('unique_mobile_number') || (error.message.includes('duplicate key value violates unique constraint') && error.message.includes('mobile_number'))) {
-        userFriendlyMessage = 'This mobile number is already registered. Please use a different mobile number.';
-      } else if (error.message.includes('duplicate key value violates unique constraint')) {
-        userFriendlyMessage = 'A user with this email or mobile number already exists.';
+      if (existingProfile) {
+        toast.error('This mobile number is already registered. Please use a different number.');
+        setIsLoading(false);
+        return;
       }
-      toast.error(userFriendlyMessage);
-    } else if (data.user) {
-      toast.success('Sign-up successful! Please check your email to verify your account.');
-      form.reset();
-      onSignUpSuccess?.();
-      navigate('/userauth/login');
+
+      if (profileError && profileError.code !== 'PGRST116') { // PGRST116 means no rows found, which is fine
+        throw new Error(profileError.message);
+      }
+
+      // If mobile number is unique, proceed with Supabase auth sign-up
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: firstName,
+            mobile_number: mobileNumber,
+          },
+        },
+      });
+
+      if (error) {
+        let userFriendlyMessage = 'An unexpected error occurred during sign up.';
+        if (error.message.includes('User already registered')) {
+          userFriendlyMessage = 'An account with this email already exists. Please try logging in or use a different email.';
+        }
+        // The unique_mobile_number constraint will also catch this at the DB level,
+        // but the explicit check above provides a more immediate and user-friendly message.
+        throw new Error(userFriendlyMessage);
+      } else if (data.user) {
+        toast.success('Sign-up successful! Please check your email to verify your account.');
+        form.reset();
+        onSignUpSuccess?.();
+        navigate('/userauth/login');
+      }
+    } catch (error: any) {
+      console.error('Sign-up error:', error);
+      toast.error(error.message || 'An unexpected error occurred during sign up.');
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
   }
 
   return (
