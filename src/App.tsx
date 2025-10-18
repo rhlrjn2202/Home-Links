@@ -1,4 +1,4 @@
-import { Routes, Route } from 'react-router-dom'; // Removed BrowserRouter import
+import { Routes, Route } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { HomePage } from './pages/HomePage';
@@ -6,10 +6,10 @@ import { SubmitPropertyPage } from './pages/SubmitPropertyPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { UserLoginPage } from './pages/UserLoginPage';
+import { UserProfilePage } from './pages/UserProfilePage'; // Import the new page
 
 export function App() {
   return (
-    // Router component removed from here
     <div className="flex flex-col min-h-screen">
       <Header />
       <main className="flex-1">
@@ -19,6 +19,7 @@ export function App() {
           <Route path="/adminauth/login" element={<AdminLoginPage />} />
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           <Route path="/userauth/login" element={<UserLoginPage />} />
+          <Route path="/profile" element={<UserProfilePage />} /> {/* Add new route */}
           {/* Add other routes here as needed */}
         </Routes>
       </main>

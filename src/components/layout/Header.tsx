@@ -1,13 +1,20 @@
 "use client";
 
 import { Link } from 'react-router-dom';
-// import { cn } from '@/lib/utils'; // Removed unused import
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
-import { Menu } from 'lucide-react';
+import { Menu, UserCircle } from 'lucide-react'; // Import UserCircle icon
 import { SubmitPropertyButton } from '@/components/SubmitPropertyButton';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import { supabase } from '@/integrations/supabase/client';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu"; // Import DropdownMenu components
 
 export function Header() {
   const { session, loading, isAdmin } = useSession();
@@ -36,7 +43,32 @@ export function Header() {
                     <Link to="/admin/dashboard">Admin</Link>
                   </Button>
                 )}
-                <Button onClick={handleLogout}>Logout</Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" className="relative h-9 w-9 rounded-full">
+                      <UserCircle className="h-5 w-5" />
+                      <span className="sr-only">User menu</span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                    <DropdownMenuLabel className="font-normal">
+                      <div className="flex flex-col space-y-1">
+                        <p className="text-sm font-medium leading-none">{session.user?.user_metadata?.first_name || session.user?.email}</p>
+                        <p className="text-xs leading-none text-muted-foreground">
+                          {session.user?.email}
+                        </p>
+                      </div>
+                    </DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem asChild>
+                      <Link to="/profile">Profile</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={handleLogout}>
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </>
             ) : (
               <Button asChild>
@@ -65,6 +97,9 @@ export function Header() {
                         <Link to="/admin/dashboard">Admin</Link>
                       </Button>
                     )}
+                    <Button asChild variant="ghost" className="w-full">
+                      <Link to="/profile">Profile</Link>
+                    </Button>
                     <Button onClick={handleLogout} className="w-full">Logout</Button>
                   </>
                 ) : (
