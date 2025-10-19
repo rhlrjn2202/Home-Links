@@ -6,7 +6,8 @@ import { SubmitPropertyPage } from './pages/SubmitPropertyPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
 import { UserLoginPage } from './pages/UserLoginPage';
-import { UserProfilePage } from './pages/UserProfilePage'; // Import the new page
+import { UserProfilePage } from './pages/UserProfilePage';
+import { ProtectedRoute } from '@/components/auth/ProtectedRoute'; // Import ProtectedRoute
 
 export function App() {
   return (
@@ -15,11 +16,18 @@ export function App() {
       <main className="flex-1">
         <Routes>
           <Route path="/" element={<HomePage />} />
-          <Route path="/submit-property" element={<SubmitPropertyPage />} />
+          <Route 
+            path="/submit-property" 
+            element={
+              <ProtectedRoute>
+                <SubmitPropertyPage />
+              </ProtectedRoute>
+            } 
+          />
           <Route path="/adminauth/login" element={<AdminLoginPage />} />
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
           <Route path="/userauth/login" element={<UserLoginPage />} />
-          <Route path="/profile" element={<UserProfilePage />} /> {/* Add new route */}
+          <Route path="/profile" element={<UserProfilePage />} />
           {/* Add other routes here as needed */}
         </Routes>
       </main>
