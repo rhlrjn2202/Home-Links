@@ -1,11 +1,12 @@
 "use client";
 
 import { PropertyManagementTable } from '@/components/admin/PropertyManagementTable';
+import { AdminLayout } from '@/components/admin/AdminLayout'; // Import AdminLayout
 
 export function AdminPropertiesPage() {
   return (
-    <div className="container mx-auto p-8">
+    <AdminLayout>
       <PropertyManagementTable />
-    </div>
+    </AdminLayout>
   );
 }
