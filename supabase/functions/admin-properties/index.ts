@@ -63,7 +63,7 @@ serve(async (req: Request) => {
     const limit = parseInt(url.searchParams.get('limit') || '10');
     const startIndex = (page - 1) * limit;
 
-    // 1. Fetch properties with associated images and user_id (from auth.users)
+    // 1. Fetch properties with associated images and only the user_id (UUID)
     const { data: properties, error: propertiesError, count } = await supabaseAdmin
       .from('properties')
       .select(`
@@ -77,32 +77,48 @@ serve(async (req: Request) => {
         transaction_type,
         created_at,
         property_images(image_url, order_index),
-        user_id(id, email)
+        user_id
       `, { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(startIndex, startIndex + limit - 1);
 
     if (propertiesError) {
-      console.error('Edge Function: Supabase properties fetch error details:', JSON.stringify(propertiesError, null, 2)); // Log full error object
-      return new Response(JSON.stringify({ error: propertiesError.message || 'Failed to fetch properties' }), { // Return specific error message
+      console.error('Edge Function: Supabase properties fetch error details:', JSON.stringify(propertiesError, null, 2));
+      return new Response(JSON.stringify({ error: propertiesError.message || 'Failed to fetch properties' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
     // 2. Extract unique user IDs from fetched properties
-    const uniqueUserIds = [...new Set(properties.map((prop: any) => prop.user_id?.id).filter(Boolean))];
+    const uniqueUserIds = [...new Set(properties.map((prop: any) => prop.user_id).filter(Boolean))];
 
+    let userEmailsMap = new Map();
     let userProfilesMap = new Map();
+
     if (uniqueUserIds.length > 0) {
-      // 3. Fetch user profiles for these unique user IDs
+      // 3. Fetch user emails from auth.users using admin client
+      const { data: { users: authUsers }, error: listUsersError } = await supabaseAdmin.auth.admin.listUsers();
+
+      if (listUsersError) {
+        console.error('Edge Function: Error fetching auth users for emails:', JSON.stringify(listUsersError, null, 2));
+        // Log the error but don't fail the entire request; proceed without emails
+      } else {
+        authUsers.forEach((authUser: any) => {
+          if (uniqueUserIds.includes(authUser.id)) {
+            userEmailsMap.set(authUser.id, authUser.email);
+          }
+        });
+      }
+
+      // 4. Fetch user profiles for these unique user IDs
       const { data: profiles, error: profilesError } = await supabaseAdmin
         .from('user_profiles')
         .select('id, first_name, mobile_number')
         .in('id', uniqueUserIds);
 
       if (profilesError) {
-        console.error('Edge Function: Error fetching user profiles:', JSON.stringify(profilesError, null, 2)); // Log full error object
+        console.error('Edge Function: Error fetching user profiles:', JSON.stringify(profilesError, null, 2));
         // Log the error but don't fail the entire request; proceed without profile names/numbers
       } else {
         profiles.forEach((profile: any) => {
@@ -111,9 +127,11 @@ serve(async (req: Request) => {
       }
     }
 
-    // 4. Format properties and combine with user profile data
+    // 5. Format properties and combine with user email and profile data
     const formattedProperties = properties.map((prop: any) => {
-      const userProfile = userProfilesMap.get(prop.user_id?.id);
+      const userProfile = userProfilesMap.get(prop.user_id);
+      const userEmail = userEmailsMap.get(prop.user_id);
+
       return {
         id: prop.id,
         title: prop.title,
@@ -125,7 +143,7 @@ serve(async (req: Request) => {
         transactionType: prop.transaction_type,
         createdAt: new Date(prop.created_at).toLocaleDateString(),
         images: prop.property_images.sort((a: any, b: any) => a.order_index - b.order_index).map((img: any) => img.image_url),
-        submittedByEmail: prop.user_id?.email || 'N/A',
+        submittedByEmail: userEmail || 'N/A',
         submittedByName: userProfile?.first_name || 'N/A',
         submittedByMobile: userProfile?.mobile_number || 'N/A',
       };
