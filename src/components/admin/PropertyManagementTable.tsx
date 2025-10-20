@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/table";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Loader2, ChevronLeft, ChevronRight, Image as ImageIcon } from 'lucide-react';
+import { Loader2, ChevronLeft, ChevronRight, Image as ImageIcon, Check, X } from 'lucide-react';
 import { toast } from 'sonner';
 import { useSession } from '@/components/auth/SessionContextProvider';
 import {
@@ -22,6 +22,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
+import { Badge } from '@/components/ui/badge';
 
 interface PropertyData {
   id: string;
@@ -33,10 +34,11 @@ interface PropertyData {
   propertyType: string;
   transactionType: string;
   createdAt: string;
+  status: 'pending' | 'approved' | 'rejected'; // Added status
   images: string[];
   submittedByEmail: string;
   submittedByName: string;
-  submittedByMobile: string; // Added to reflect mobile number
+  submittedByMobile: string;
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -47,7 +49,8 @@ export function PropertyManagementTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalProperties, setTotalProperties] = useState(0); 
+  const [totalProperties, setTotalProperties] = useState(0);
+  const [actionLoading, setActionLoading] = useState<string | null>(null); // To manage loading state for individual actions
 
   const fetchProperties = async () => {
     if (sessionLoading) return;
@@ -80,7 +83,7 @@ export function PropertyManagementTable() {
       }
       const { properties: fetchedProperties, totalCount }: { properties: PropertyData[], totalCount: number } = await response.json();
       setProperties(fetchedProperties);
-      setTotalProperties(totalCount); // Corrected to setTotalProperties
+      setTotalProperties(totalCount);
     } catch (err: any) {
       console.error('Error fetching properties:', err);
       setError(err.message || 'An unexpected error occurred.');
@@ -102,6 +105,50 @@ export function PropertyManagementTable() {
 
   const handleNextPage = () => {
     setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+  };
+
+  const performPropertyAction = async (action: 'approveProperty' | 'disapproveProperty', propertyId: string) => {
+    if (!session?.access_token) {
+      toast.error('Authentication session not available. Please log in again.');
+      return;
+    }
+
+    setActionLoading(propertyId);
+    try {
+      const SUPABASE_URL = "https://vytctxgktgblnrsznhgw.supabase.co";
+      const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/admin-property-actions`;
+
+      const response = await fetch(edgeFunctionUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ action, propertyId }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.error || `Failed to perform action on property.`);
+      }
+
+      const result = await response.json();
+      toast.success(result.message);
+      fetchProperties(); // Refresh the property list after action
+    } catch (err: any) {
+      console.error(`Error performing ${action} for property ${propertyId}:`, err);
+      toast.error(err.message || `An unexpected error occurred during property action.`);
+    } finally {
+      setActionLoading(null);
+    }
+  };
+
+  const handleApproveProperty = (propertyId: string) => {
+    performPropertyAction('approveProperty', propertyId);
+  };
+
+  const handleDisapproveProperty = (propertyId: string) => {
+    performPropertyAction('disapproveProperty', propertyId);
   };
 
   if (loading || sessionLoading) {
@@ -141,13 +188,15 @@ export function PropertyManagementTable() {
                 <TableHead>Location</TableHead>
                 <TableHead>Submitted By</TableHead>
                 <TableHead className="text-center">Images</TableHead>
+                <TableHead>Status</TableHead> {/* New Status column */}
+                <TableHead className="text-center">Actions</TableHead> {/* New Actions column */}
                 <TableHead>Created At</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
               {properties.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={9} className="h-24 text-center">
+                  <TableCell colSpan={11} className="h-24 text-center">
                     No properties found.
                   </TableCell>
                 </TableRow>
@@ -205,6 +254,47 @@ export function PropertyManagementTable() {
                       ) : (
                         <span className="text-muted-foreground text-sm">No Images</span>
                       )}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        className={
+                          property.status === 'approved'
+                            ? 'bg-green-500 hover:bg-green-500/80'
+                            : property.status === 'rejected'
+                            ? 'bg-red-500 hover:bg-red-500/80'
+                            : 'bg-yellow-500 hover:bg-yellow-500/80'
+                        }
+                      >
+                        {property.status.charAt(0).toUpperCase() + property.status.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell className="flex justify-center space-x-2">
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleApproveProperty(property.id)}
+                        disabled={actionLoading === property.id || property.status === 'approved'}
+                        title="Approve Property"
+                      >
+                        {actionLoading === property.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <Check className="h-4 w-4 text-green-500" />
+                        )}
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={() => handleDisapproveProperty(property.id)}
+                        disabled={actionLoading === property.id || property.status === 'rejected'}
+                        title="Disapprove Property"
+                      >
+                        {actionLoading === property.id ? (
+                          <Loader2 className="h-4 w-4 animate-spin" />
+                        ) : (
+                          <X className="h-4 w-4 text-red-500" />
+                        )}
+                      </Button>
                     </TableCell>
                     <TableCell>{property.createdAt}</TableCell>
                   </TableRow>

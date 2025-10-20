@@ -76,6 +76,7 @@ serve(async (req: Request) => {
         property_type,
         transaction_type,
         created_at,
+        status,
         property_images(image_url, order_index),
         user_id
       `, { count: 'exact' })
@@ -142,6 +143,7 @@ serve(async (req: Request) => {
         propertyType: prop.property_type,
         transactionType: prop.transaction_type,
         createdAt: new Date(prop.created_at).toLocaleDateString(),
+        status: prop.status, // Include status
         images: prop.property_images.sort((a: any, b: any) => a.order_index - b.order_index).map((img: any) => img.image_url),
         submittedByEmail: userEmail || 'N/A',
         submittedByName: userProfile?.first_name || 'N/A',
