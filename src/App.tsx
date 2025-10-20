@@ -5,6 +5,7 @@ import { HomePage } from './pages/HomePage';
 import { SubmitPropertyPage } from './pages/SubmitPropertyPage';
 import { AdminLoginPage } from './pages/AdminLoginPage';
 import { AdminDashboardPage } from './pages/AdminDashboardPage';
+import { AdminPropertiesPage } from './pages/AdminPropertiesPage'; // Import AdminPropertiesPage
 import { UserLoginPage } from './pages/UserLoginPage';
 import { UserProfilePage } from './pages/UserProfilePage';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'; // Import ProtectedRoute
@@ -26,6 +27,7 @@ export function App() {
           />
           <Route path="/adminauth/login" element={<AdminLoginPage />} />
           <Route path="/admin/dashboard" element={<AdminDashboardPage />} />
+          <Route path="/admin/properties" element={<AdminPropertiesPage />} /> {/* New route for properties */}
           <Route path="/userauth/login" element={<UserLoginPage />} />
           <Route path="/profile" element={<UserProfilePage />} />
           {/* Add other routes here as needed */}
