@@ -22,6 +22,9 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { PropertyImageUpload } from '@/components/properties/PropertyImageUpload'; // Import the new component
+import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
+import { supabase } from '@/integrations/supabase/client'; // Import supabase client
 
 const KERALA_DISTRICTS = [
   "Alappuzha", "Ernakulam", "Idukku", "Kannur", "Kasaragod", "Kollam",
@@ -40,11 +43,13 @@ const formSchema = z.object({
   locality: z.string().min(3, { message: 'Locality must be at least 3 characters.' }).max(100, { message: 'Locality must not exceed 100 characters.' }),
   propertyType: z.string().min(1, { message: 'Please select a property type.' }),
   transactionType: z.enum(["For Sale", "For Rent"], { message: 'Please select a transaction type.' }),
+  images: z.array(z.instanceof(File)).max(5, { message: 'You can upload a maximum of 5 images.' }).min(1, { message: 'Please upload at least one image.' }), // New field for images
 });
 
 type PropertyFormValues = z.infer<typeof formSchema>;
 
 export function SubmitPropertyPage() {
+  const { session, user } = useSession(); // Get session and user from context
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<PropertyFormValues>({
@@ -56,22 +61,88 @@ export function SubmitPropertyPage() {
       district: '',
       locality: '',
       propertyType: '',
-      transactionType: "For Sale", // Default to For Sale
+      transactionType: "For Sale",
+      images: [], // Initialize images as an empty array
     },
   });
 
   async function onSubmit(values: PropertyFormValues) {
+    if (!user) {
+      toast.error('You must be logged in to submit a property.');
+      return;
+    }
+
     setIsLoading(true);
-    console.log("Property Submission Data:", values);
-    // Here you would typically send this data to your backend/Supabase
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1500));
-      toast.success('Property submitted successfully! (This is a demo submission)');
-      form.reset();
-    } catch (error) {
-      console.error('Submission error:', error);
-      toast.error('Failed to submit property. Please try again.');
+      // 1. Upload images to Cloudinary via Edge Function
+      const formData = new FormData();
+      values.images.forEach((file) => {
+        formData.append('images', file);
+      });
+
+      const SUPABASE_URL = "https://vytctxgktgblnrsznhgw.supabase.co";
+      const edgeFunctionUrl = `${SUPABASE_URL}/functions/v1/upload-property-image`;
+
+      const uploadResponse = await fetch(edgeFunctionUrl, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session?.access_token}`,
+        },
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        const errorData = await uploadResponse.json();
+        throw new Error(errorData.error || 'Failed to upload images.');
+      }
+
+      const { urls: imageUrls } = await uploadResponse.json();
+      if (!imageUrls || imageUrls.length === 0) {
+        throw new Error('No image URLs received from upload service.');
+      }
+
+      // 2. Insert property details into Supabase 'properties' table
+      const { data: propertyData, error: propertyError } = await supabase
+        .from('properties')
+        .insert({
+          user_id: user.id,
+          title: values.title,
+          description: values.description,
+          price: values.price,
+          district: values.district,
+          locality: values.locality,
+          property_type: values.propertyType,
+          transaction_type: values.transactionType,
+        })
+        .select('id')
+        .single();
+
+      if (propertyError) {
+        throw propertyError;
+      }
+
+      const propertyId = propertyData.id;
+
+      // 3. Insert image URLs into Supabase 'property_images' table
+      const imagesToInsert = imageUrls.map((url: string, index: number) => ({
+        property_id: propertyId,
+        image_url: url,
+        order_index: index,
+      }));
+
+      const { error: imagesError } = await supabase
+        .from('property_images')
+        .insert(imagesToInsert);
+
+      if (imagesError) {
+        throw imagesError;
+      }
+
+      toast.success('Property submitted successfully!');
+      form.reset(); // Reset form including image previews
+    } catch (error: any) {
+      console.error('Property submission error:', error);
+      toast.error(error.message || 'An unexpected error occurred during property submission.');
     } finally {
       setIsLoading(false);
     }
@@ -166,7 +237,6 @@ export function SubmitPropertyPage() {
                 )}
               />
 
-              {/* District and Locality fields moved here */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -241,6 +311,24 @@ export function SubmitPropertyPage() {
                     <FormDescription>
                       Enter the selling price or monthly rent.
                     </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Property Image Upload Field */}
+              <FormField
+                control={form.control}
+                name="images"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormControl>
+                      <PropertyImageUpload
+                        name={field.name}
+                        control={form.control}
+                        maxFiles={5}
+                      />
+                    </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
