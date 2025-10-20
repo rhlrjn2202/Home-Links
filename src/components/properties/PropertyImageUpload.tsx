@@ -1,9 +1,9 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { useController, UseControllerProps } from 'react-hook-form';
-import { Image as ImageIcon, XCircle, UploadCloud } from 'lucide-react';
+import { XCircle, UploadCloud } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { FormDescription, FormLabel, FormMessage } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
