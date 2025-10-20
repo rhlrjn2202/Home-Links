@@ -95,7 +95,7 @@ export function SubmitPropertyPage() {
                 name="transactionType"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Looking to</FormLabel> {/* Renamed label here */}
+                    <FormLabel>Looking to</FormLabel>
                     <FormControl>
                       <ToggleGroup
                         type="single"
@@ -141,7 +141,6 @@ export function SubmitPropertyPage() {
                 )}
               />
 
-              {/* Moved Property Type field here */}
               <FormField
                 control={form.control}
                 name="propertyType"
@@ -167,44 +166,7 @@ export function SubmitPropertyPage() {
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="description"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Description</FormLabel>
-                    <FormControl>
-                      <Textarea
-                        placeholder="Describe your property in detail..."
-                        className="min-h-[100px]"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormDescription>
-                      Provide a detailed description including features, amenities, and highlights.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price (in INR)</FormLabel>
-                    <FormControl>
-                      <Input type="number" placeholder="e.g., 7500000 (for 75 Lacs)" {...field} />
-                    </FormControl>
-                    <FormDescription>
-                      Enter the selling price or monthly rent.
-                    </FormDescription>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
+              {/* District and Locality fields moved here */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
@@ -246,7 +208,43 @@ export function SubmitPropertyPage() {
                 />
               </div>
 
-              {/* Original position of Property Type field removed */}
+              <FormField
+                control={form.control}
+                name="description"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Description</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Describe your property in detail..."
+                        className="min-h-[100px]"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormDescription>
+                      Provide a detailed description including features, amenities, and highlights.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="price"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Price (in INR)</FormLabel>
+                    <FormControl>
+                      <Input type="number" placeholder="e.g., 7500000 (for 75 Lacs)" {...field} />
+                    </FormControl>
+                    <FormDescription>
+                      Enter the selling price or monthly rent.
+                    </FormDescription>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
               <Button type="submit" className="w-full" disabled={isLoading}>
                 {isLoading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
