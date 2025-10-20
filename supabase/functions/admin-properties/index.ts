@@ -63,7 +63,7 @@ serve(async (req: Request) => {
     const limit = parseInt(url.searchParams.get('limit') || '10');
     const startIndex = (page - 1) * limit;
 
-    // Fetch properties with associated images and user email
+    // 1. Fetch properties with associated images and user_id (from auth.users)
     const { data: properties, error: propertiesError, count } = await supabaseAdmin
       .from('properties')
       .select(`
@@ -77,33 +77,59 @@ serve(async (req: Request) => {
         transaction_type,
         created_at,
         property_images(image_url, order_index),
-        user_id(email, user_profiles(first_name, mobile_number))
+        user_id(id, email)
       `, { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(startIndex, startIndex + limit - 1);
 
     if (propertiesError) {
-      console.error('Edge Function: Supabase properties fetch error details:', propertiesError); // Added detailed error logging
+      console.error('Edge Function: Supabase properties fetch error details:', propertiesError);
       return new Response(JSON.stringify({ error: 'Failed to fetch properties' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
-    const formattedProperties = properties.map((prop: any) => ({
-      id: prop.id,
-      title: prop.title,
-      description: prop.description,
-      price: prop.price,
-      district: prop.district,
-      locality: prop.locality,
-      propertyType: prop.property_type,
-      transactionType: prop.transaction_type,
-      createdAt: new Date(prop.created_at).toLocaleDateString(),
-      images: prop.property_images.sort((a: any, b: any) => a.order_index - b.order_index).map((img: any) => img.image_url),
-      submittedByEmail: prop.user_id?.email || 'N/A',
-      submittedByName: prop.user_id?.user_profiles?.first_name || 'N/A',
-    }));
+    // 2. Extract unique user IDs from fetched properties
+    const uniqueUserIds = [...new Set(properties.map((prop: any) => prop.user_id?.id).filter(Boolean))];
+
+    let userProfilesMap = new Map();
+    if (uniqueUserIds.length > 0) {
+      // 3. Fetch user profiles for these unique user IDs
+      const { data: profiles, error: profilesError } = await supabaseAdmin
+        .from('user_profiles')
+        .select('id, first_name, mobile_number')
+        .in('id', uniqueUserIds);
+
+      if (profilesError) {
+        console.error('Edge Function: Error fetching user profiles:', profilesError);
+        // Log the error but don't fail the entire request; proceed without profile names/numbers
+      } else {
+        profiles.forEach((profile: any) => {
+          userProfilesMap.set(profile.id, profile);
+        });
+      }
+    }
+
+    // 4. Format properties and combine with user profile data
+    const formattedProperties = properties.map((prop: any) => {
+      const userProfile = userProfilesMap.get(prop.user_id?.id);
+      return {
+        id: prop.id,
+        title: prop.title,
+        description: prop.description,
+        price: prop.price,
+        district: prop.district,
+        locality: prop.locality,
+        propertyType: prop.property_type,
+        transactionType: prop.transaction_type,
+        createdAt: new Date(prop.created_at).toLocaleDateString(),
+        images: prop.property_images.sort((a: any, b: any) => a.order_index - b.order_index).map((img: any) => img.image_url),
+        submittedByEmail: prop.user_id?.email || 'N/A',
+        submittedByName: userProfile?.first_name || 'N/A',
+        submittedByMobile: userProfile?.mobile_number || 'N/A',
+      };
+    });
 
     return new Response(JSON.stringify({ properties: formattedProperties, totalCount: count }), {
       status: 200,

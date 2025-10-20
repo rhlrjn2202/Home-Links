@@ -36,6 +36,7 @@ interface PropertyData {
   images: string[];
   submittedByEmail: string;
   submittedByName: string;
+  submittedByMobile: string; // Added to reflect mobile number
 }
 
 const ITEMS_PER_PAGE = 10;
@@ -46,7 +47,7 @@ export function PropertyManagementTable() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
-  const [totalProperties, setTotalProperties] = useState(0);
+  const [totalProperties, setTotalProperties] = useState(0); 
 
   const fetchProperties = async () => {
     if (sessionLoading) return;
@@ -79,7 +80,7 @@ export function PropertyManagementTable() {
       }
       const { properties: fetchedProperties, totalCount }: { properties: PropertyData[], totalCount: number } = await response.json();
       setProperties(fetchedProperties);
-      setTotalProperties(totalCount);
+      setTotalProperties(totalCount); // Corrected to setTotalProperties
     } catch (err: any) {
       console.error('Error fetching properties:', err);
       setError(err.message || 'An unexpected error occurred.');
@@ -163,6 +164,12 @@ export function PropertyManagementTable() {
                       <span className="font-medium">{property.submittedByName}</span>
                       <br />
                       <span className="text-muted-foreground text-sm">{property.submittedByEmail}</span>
+                      {property.submittedByMobile !== 'N/A' && (
+                        <>
+                          <br />
+                          <span className="text-muted-foreground text-sm">{property.submittedByMobile}</span>
+                        </>
+                      )}
                     </TableCell>
                     <TableCell className="text-center">
                       {property.images && property.images.length > 0 ? (
