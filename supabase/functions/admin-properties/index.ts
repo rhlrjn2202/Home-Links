@@ -77,15 +77,17 @@ serve(async (req: Request) => {
         transaction_type,
         created_at,
         property_images(image_url, order_index),
-        user_id!inner(email),
-        user_profiles!inner(first_name, mobile_number)
+        user_id(
+          email,
+          user_profiles(first_name, mobile_number)
+        )
       `, { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(startIndex, startIndex + limit - 1);
 
     if (propertiesError) {
       console.error('Edge Function: Error fetching properties:', propertiesError);
-      return new Response(JSON.stringify({ error: 'Failed to fetch properties', details: propertiesError.message }), {
+      return new Response(JSON.stringify({ error: 'Failed to fetch properties' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -103,7 +105,7 @@ serve(async (req: Request) => {
       createdAt: new Date(prop.created_at).toLocaleDateString(),
       images: prop.property_images.sort((a: any, b: any) => a.order_index - b.order_index).map((img: any) => img.image_url),
       submittedByEmail: prop.user_id?.email || 'N/A',
-      submittedByName: prop.user_profiles?.first_name || 'N/A',
+      submittedByName: prop.user_id?.user_profiles?.first_name || 'N/A', // Corrected access path
     }));
 
     return new Response(JSON.stringify({ properties: formattedProperties, totalCount: count }), {
