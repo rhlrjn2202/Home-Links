@@ -72,20 +72,18 @@ serve(async (req: Request) => {
     const uploadedImageUrls: string[] = [];
 
     for (const file of files) {
-      const arrayBuffer = await file.arrayBuffer();
-      const base64 = btoa(String.fromCharCode(...new Uint8Array(arrayBuffer)));
+      const cloudinaryFormData = new FormData();
+      cloudinaryFormData.append('file', file); // Append the Deno File object directly
+      cloudinaryFormData.append('upload_preset', 'ml_default'); // Use your Cloudinary upload preset
+      cloudinaryFormData.append('folder', 'property_images'); // Optional: organize uploads in a specific folder
 
       const cloudinaryUploadResponse = await fetch(`https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD_NAME}/image/upload`, {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          // No 'Content-Type' header needed for FormData, fetch will set it automatically
           'Authorization': `Basic ${btoa(`${CLOUDINARY_API_KEY}:${CLOUDINARY_API_SECRET}`)}`,
         },
-        body: JSON.stringify({
-          file: `data:${file.type};base64,${base64}`,
-          upload_preset: 'ml_default', // You might want to create a specific upload preset in Cloudinary
-          folder: 'property_images', // Optional: organize uploads in a specific folder
-        }),
+        body: cloudinaryFormData, // Send the FormData directly
       });
 
       if (!cloudinaryUploadResponse.ok) {
