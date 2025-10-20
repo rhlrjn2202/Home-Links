@@ -6,8 +6,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 
 export function TopPickedProperties() {
+  // NOTE: In a real application, these properties would be fetched from a database.
+  // For demonstration, we're using static data and assigning dummy IDs.
   const allProperties: PropertyCardProps[] = [
     {
+      id: "prop-001",
       imageSrc: "/images/property-1.jpg",
       title: "Luxury Villa in Kochi",
       location: "Kochi, Ernakulam",
@@ -16,6 +19,7 @@ export function TopPickedProperties() {
       transactionType: "For Sale",
     },
     {
+      id: "prop-002",
       imageSrc: "/images/property-2.jpg",
       title: "Modern Apartment in Trivandrum",
       location: "Trivandrum, Thiruvananthapuram",
@@ -24,6 +28,7 @@ export function TopPickedProperties() {
       transactionType: "For Sale",
     },
     {
+      id: "prop-003",
       imageSrc: "/images/property-3.jpg",
       title: "Spacious Plot in Calicut",
       location: "Calicut, Kozhikode",
@@ -32,6 +37,7 @@ export function TopPickedProperties() {
       transactionType: "For Sale",
     },
     {
+      id: "prop-004",
       imageSrc: "/images/property-4.jpg",
       title: "Beachfront House for Rent",
       location: "Alappuzha, Alappuzha",
@@ -40,6 +46,7 @@ export function TopPickedProperties() {
       transactionType: "For Rent",
     },
     {
+      id: "prop-005",
       imageSrc: "/images/property-1.jpg",
       title: "Commercial Space in Thrissur",
       location: "Thrissur, Thrissur",
@@ -48,6 +55,7 @@ export function TopPickedProperties() {
       transactionType: "For Sale",
     },
     {
+      id: "prop-006",
       imageSrc: "/images/property-2.jpg",
       title: "Riverside Plot in Kottayam",
       location: "Kottayam, Kottayam",
@@ -56,6 +64,7 @@ export function TopPickedProperties() {
       transactionType: "For Sale",
     },
     {
+      id: "prop-007",
       imageSrc: "/images/property-3.jpg",
       title: "Furnished Apartment in Kozhikode",
       location: "Kozhikode, Kozhikode",
@@ -86,7 +95,7 @@ export function TopPickedProperties() {
             >
               <CarouselContent className="-ml-4 px-6 md:px-8">
                 {propertiesToShow.map((property, index) => (
-                  <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/4 xl:basis-1/4">
+                  <CarouselItem key={property.id} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/4 xl:basis-1/4">
                     <PropertyCard {...property} index={index + 1} />
                   </CarouselItem>
                 ))}

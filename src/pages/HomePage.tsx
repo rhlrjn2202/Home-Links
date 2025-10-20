@@ -27,6 +27,7 @@ export function HomePage() {
             groupedProperties[prop.district] = [];
           }
           groupedProperties[prop.district].push({
+            id: prop.id, // Pass the property ID
             imageSrc: prop.property_images[0]?.image_url || '/images/placeholder.jpg', // Use first image or a placeholder
             title: prop.title,
             location: `${prop.locality}, ${prop.district}`,

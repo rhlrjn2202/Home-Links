@@ -9,6 +9,7 @@ import { AdminPropertiesPage } from './pages/AdminPropertiesPage'; // Import Adm
 import { UserLoginPage } from './pages/UserLoginPage';
 import { UserProfilePage } from './pages/UserProfilePage';
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'; // Import ProtectedRoute
+import { PropertyDetailsPage } from './pages/PropertyDetailsPage'; // Import PropertyDetailsPage
 
 export function App() {
   return (
@@ -30,6 +31,7 @@ export function App() {
           <Route path="/admin/properties" element={<AdminPropertiesPage />} /> {/* New route for properties */}
           <Route path="/userauth/login" element={<UserLoginPage />} />
           <Route path="/profile" element={<UserProfilePage />} />
+          <Route path="/properties/:id" element={<PropertyDetailsPage />} /> {/* New route for property details */}
           {/* Add other routes here as needed */}
         </Routes>
       </main>

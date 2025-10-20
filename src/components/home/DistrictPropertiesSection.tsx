@@ -34,8 +34,8 @@ export function DistrictPropertiesSection({ districtName, properties }: District
               className="w-full"
             >
               <CarouselContent className="-ml-4 px-6 md:px-8">
-                {properties.map((property, index) => (
-                  <CarouselItem key={index} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                {properties.map((property) => (
+                  <CarouselItem key={property.id} className="pl-4 basis-full sm:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                     <PropertyCard {...property} />
                   </CarouselItem>
                 ))}

@@ -46,3 +46,41 @@ export async function fetchPublicProperties(): Promise<Property[]> {
     property_images: property.property_images.sort((a, b) => a.order_index - b.order_index),
   }));
 }
+
+export async function fetchPropertyById(id: string): Promise<Property | null> {
+  const { data, error } = await supabase
+    .from('properties')
+    .select(`
+      id,
+      title,
+      description,
+      price,
+      district,
+      locality,
+      property_type,
+      transaction_type,
+      created_at,
+      status,
+      property_images(image_url, order_index)
+    `)
+    .eq('id', id)
+    .eq('status', 'approved') // Only fetch approved properties
+    .single();
+
+  if (error && error.code !== 'PGRST116') { // PGRST116 means no rows found
+    console.error(`Error fetching property with ID ${id}:`, error);
+    throw new Error('Failed to fetch property details.');
+  }
+
+  if (!data) {
+    return null;
+  }
+
+  return {
+    ...data,
+    property_type: data.property_type,
+    transaction_type: data.transaction_type as 'For Sale' | 'For Rent',
+    status: data.status as 'pending' | 'approved' | 'rejected',
+    property_images: data.property_images.sort((a, b) => a.order_index - b.order_index),
+  };
+}

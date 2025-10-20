@@ -3,8 +3,10 @@
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Link } from 'react-router-dom'; // Import Link
 
 export interface PropertyCardProps {
+  id: string; // Added property ID
   imageSrc: string;
   title: string;
   location: string;
@@ -14,7 +16,7 @@ export interface PropertyCardProps {
   index?: number; // Optional index for the overlay
 }
 
-export function PropertyCard({ imageSrc, title, location, price, type, transactionType, index }: PropertyCardProps) {
+export function PropertyCard({ id, imageSrc, title, location, price, type, transactionType, index }: PropertyCardProps) {
   return (
     <Card className="w-full overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300">
       <div className="relative h-48 w-full">
@@ -45,7 +47,9 @@ export function PropertyCard({ imageSrc, title, location, price, type, transacti
         <p className="text-xl font-bold text-price-accent">{price}</p>
       </CardContent>
       <CardFooter>
-        <Button className="w-full">View Details</Button>
+        <Button asChild className="w-full">
+          <Link to={`/properties/${id}`}>View Details</Link>
+        </Button>
       </CardFooter>
     </Card>
   );
