@@ -83,8 +83,8 @@ serve(async (req: Request) => {
       .range(startIndex, startIndex + limit - 1);
 
     if (propertiesError) {
-      console.error('Edge Function: Supabase properties fetch error details:', propertiesError);
-      return new Response(JSON.stringify({ error: 'Failed to fetch properties' }), {
+      console.error('Edge Function: Supabase properties fetch error details:', JSON.stringify(propertiesError, null, 2)); // Log full error object
+      return new Response(JSON.stringify({ error: propertiesError.message || 'Failed to fetch properties' }), { // Return specific error message
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
@@ -102,7 +102,7 @@ serve(async (req: Request) => {
         .in('id', uniqueUserIds);
 
       if (profilesError) {
-        console.error('Edge Function: Error fetching user profiles:', profilesError);
+        console.error('Edge Function: Error fetching user profiles:', JSON.stringify(profilesError, null, 2)); // Log full error object
         // Log the error but don't fail the entire request; proceed without profile names/numbers
       } else {
         profiles.forEach((profile: any) => {
