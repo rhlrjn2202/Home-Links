@@ -83,7 +83,7 @@ serve(async (req: Request) => {
       .range(startIndex, startIndex + limit - 1);
 
     if (propertiesError) {
-      console.error('Edge Function: Error fetching properties:', propertiesError);
+      console.error('Edge Function: Supabase properties fetch error details:', propertiesError); // Added detailed error logging
       return new Response(JSON.stringify({ error: 'Failed to fetch properties' }), {
         status: 500,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
