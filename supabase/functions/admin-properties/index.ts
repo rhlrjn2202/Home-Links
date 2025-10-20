@@ -78,7 +78,7 @@ serve(async (req: Request) => {
         created_at,
         property_images(image_url, order_index),
         user_profiles(first_name, mobile_number),
-        auth_users:user_id(email)
+        user_id(email)
       `, { count: 'exact' })
       .order('created_at', { ascending: false })
       .range(startIndex, startIndex + limit - 1);
@@ -102,7 +102,7 @@ serve(async (req: Request) => {
       transactionType: prop.transaction_type,
       createdAt: new Date(prop.created_at).toLocaleDateString(),
       images: prop.property_images.sort((a: any, b: any) => a.order_index - b.order_index).map((img: any) => img.image_url),
-      submittedByEmail: prop.auth_users?.email || 'N/A',
+      submittedByEmail: prop.user_id?.email || 'N/A', // Corrected access to email
       submittedByName: prop.user_profiles?.first_name || 'N/A',
     }));
 
