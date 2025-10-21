@@ -84,3 +84,36 @@ export async function fetchPropertyById(id: string): Promise<Property | null> {
     property_images: data.property_images.sort((a, b) => a.order_index - b.order_index),
   };
 }
+
+export async function fetchUserProperties(userId: string): Promise<Property[]> {
+  const { data, error } = await supabase
+    .from('properties')
+    .select(`
+      id,
+      title,
+      description,
+      price,
+      district,
+      locality,
+      property_type,
+      transaction_type,
+      created_at,
+      status,
+      property_images(image_url, order_index)
+    `)
+    .eq('user_id', userId)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    console.error(`Error fetching properties for user ${userId}:`, error);
+    throw new Error('Failed to fetch user properties.');
+  }
+
+  return data.map(property => ({
+    ...property,
+    property_type: property.property_type,
+    transaction_type: property.transaction_type as 'For Sale' | 'For Rent',
+    status: property.status as 'pending' | 'approved' | 'rejected',
+    property_images: property.property_images.sort((a, b) => a.order_index - b.order_index),
+  }));
+}
