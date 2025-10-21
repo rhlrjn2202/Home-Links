@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { fetchUserProperties, Property } from '@/lib/supabase/properties'; // Import Property interface and fetchUserProperties
 import { Badge } from '@/components/ui/badge'; // Import Badge component
+import { formatPriceInINR } from '@/lib/formatters'; // Import formatter
 
 interface UserProfile {
   first_name: string;
@@ -238,7 +239,7 @@ export function UserProfilePage() {
                   </CardHeader>
                   <CardContent className="flex flex-col gap-2">
                     <div className="flex justify-between items-center">
-                      <span className="text-xl font-bold text-price-accent">{property.price}</span>
+                      <span className="text-xl font-bold text-price-accent">{formatPriceInINR(property.price)}</span>
                       <span className="text-sm text-muted-foreground">{property.transaction_type}</span>
                     </div>
                     <div className="flex gap-2 mt-2">

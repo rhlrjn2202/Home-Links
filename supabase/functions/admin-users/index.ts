@@ -31,6 +31,25 @@ function convertToCsv(data: any[]) {
   return csvRows.join('\n');
 }
 
+// Helper function to format date to IST
+function formatDateToIST(dateString: string): string {
+  if (!dateString) {
+    return 'N/A';
+  }
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return 'Invalid Date';
+  }
+  return date.toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Asia/Kolkata', // Indian Standard Time
+  });
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -149,7 +168,7 @@ serve(async (req: Request) => {
         name: userProfile?.first_name || u.user_metadata?.first_name || 'N/A', // Prioritize profile, then metadata
         mobileNumber: userProfile?.mobile_number || u.user_metadata?.mobile_number || 'N/A', // Prioritize profile, then metadata
         email: u.email || 'N/A',
-        accountCreated: new Date(u.created_at).toLocaleDateString(),
+        accountCreated: formatDateToIST(u.created_at), // Apply formatter here
         plan: 'N/A', // Placeholder, as subscription data is not fetched here
         daysLeft: 'N/A', // Placeholder
         isBlocked: isBlocked, // Include ban status

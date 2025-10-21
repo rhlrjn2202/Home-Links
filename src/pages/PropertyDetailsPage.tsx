@@ -9,6 +9,7 @@ import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious
 import { Loader2, MapPin, Tag, Home, DollarSign, Calendar, Phone, Mail } from 'lucide-react';
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
+import { formatPriceInINR, formatDateToIST } from '@/lib/formatters'; // Import formatters
 
 export function PropertyDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -71,11 +72,7 @@ export function PropertyDetailsPage() {
     );
   }
 
-  const formattedDate = new Date(property.created_at).toLocaleDateString('en-IN', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-  });
+  const formattedDate = formatDateToIST(property.created_at);
 
   return (
     <div className="container mx-auto p-4 md:p-8">
@@ -117,7 +114,7 @@ export function PropertyDetailsPage() {
           {/* Price and Transaction Type */}
           <div className="flex flex-col sm:flex-row justify-between items-center bg-secondary p-4 rounded-lg shadow-sm">
             <div className="flex items-center text-2xl font-bold text-price-accent mb-2 sm:mb-0">
-              <DollarSign className="mr-2 h-6 w-6" /> {property.price}
+              <DollarSign className="mr-2 h-6 w-6" /> {formatPriceInINR(property.price)}
             </div>
             <div className="flex items-center text-lg text-muted-foreground">
               <Tag className="mr-2 h-5 w-5" /> {property.transaction_type}

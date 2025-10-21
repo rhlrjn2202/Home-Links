@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from '@/components/ui/carousel';
 import { Badge } from '@/components/ui/badge';
+import { formatPriceInINR, formatDateToIST } from '@/lib/formatters'; // Import formatters
 
 interface PropertyData {
   id: string;
@@ -207,7 +208,7 @@ export function PropertyManagementTable() {
                     <TableCell>{property.title}</TableCell>
                     <TableCell>{property.propertyType}</TableCell>
                     <TableCell>{property.transactionType}</TableCell>
-                    <TableCell>{property.price}</TableCell>
+                    <TableCell>{formatPriceInINR(property.price)}</TableCell> {/* Apply formatter */}
                     <TableCell>{property.locality}, {property.district}</TableCell>
                     <TableCell>
                       <span className="font-medium">{property.submittedByName}</span>
@@ -296,7 +297,7 @@ export function PropertyManagementTable() {
                         )}
                       </Button>
                     </TableCell>
-                    <TableCell>{property.createdAt}</TableCell>
+                    <TableCell>{formatDateToIST(property.createdAt)}</TableCell> {/* Apply formatter */}
                   </TableRow>
                 ))
               )}

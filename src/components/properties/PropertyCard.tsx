@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Link } from 'react-router-dom'; // Import Link
+import { formatPriceInINR } from '@/lib/formatters'; // Import formatter
 
 export interface PropertyCardProps {
   id: string; // Added property ID
@@ -44,7 +45,7 @@ export function PropertyCard({ id, imageSrc, title, location, price, type, trans
         </CardDescription>
       </CardHeader>
       <CardContent className="pb-4">
-        <p className="text-xl font-bold text-price-accent">{price}</p>
+        <p className="text-xl font-bold text-price-accent">{formatPriceInINR(price)}</p>
       </CardContent>
       <CardFooter>
         <Button asChild className="w-full">

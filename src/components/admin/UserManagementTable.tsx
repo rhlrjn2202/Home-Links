@@ -26,6 +26,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
+import { formatDateToIST } from '@/lib/formatters'; // Import formatter
 
 interface UserData {
   slNo: number;
@@ -211,7 +212,7 @@ export function UserManagementTable() {
                     <TableCell>{user.name}</TableCell>
                     <TableCell>{user.mobileNumber}</TableCell>
                     <TableCell>{user.email}</TableCell>
-                    <TableCell>{user.accountCreated}</TableCell>
+                    <TableCell>{formatDateToIST(user.accountCreated)}</TableCell> {/* Apply formatter */}
                     <TableCell>{user.plan}</TableCell>
                     <TableCell>{user.daysLeft}</TableCell>
                     <TableCell className="flex justify-center space-x-2">

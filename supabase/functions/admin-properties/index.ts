@@ -7,6 +7,25 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Helper function to format date to IST
+function formatDateToIST(dateString: string): string {
+  if (!dateString) {
+    return 'N/A';
+  }
+  const date = new Date(dateString);
+  if (isNaN(date.getTime())) {
+    return 'Invalid Date';
+  }
+  return date.toLocaleDateString('en-IN', {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    timeZone: 'Asia/Kolkata', // Indian Standard Time
+  });
+}
+
 serve(async (req: Request) => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -142,7 +161,7 @@ serve(async (req: Request) => {
         locality: prop.locality,
         propertyType: prop.property_type,
         transactionType: prop.transaction_type,
-        createdAt: new Date(prop.created_at).toLocaleDateString(),
+        createdAt: formatDateToIST(prop.created_at), // Apply formatter here
         status: prop.status, // Include status
         images: prop.property_images.sort((a: any, b: any) => a.order_index - b.order_index).map((img: any) => img.image_url),
         submittedByEmail: userEmail || 'N/A',
