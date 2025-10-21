@@ -124,11 +124,13 @@ export function UserProfilePage() {
     );
   }
 
+  const profileTitle = profile.first_name !== 'N/A' ? `${profile.first_name}'s Profile` : `Profile for ${profile.email}`;
+
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-140px)] p-4">
       <Card className="w-full max-w-md">
         <CardHeader>
-          <CardTitle className="text-2xl text-center">User Profile</CardTitle>
+          <CardTitle className="text-2xl text-center">{profileTitle}</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div>
