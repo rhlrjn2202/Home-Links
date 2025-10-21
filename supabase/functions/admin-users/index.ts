@@ -116,18 +116,38 @@ serve(async (req: Request) => {
         return dateB - dateA; // Descending order
       });
 
+    // Fetch user profiles for these non-admin users to get first_name and mobile_number
+    const uniqueNonAdminUserIds = [...new Set(nonAdminUsers.map((u: any) => u.id))];
+    let userProfilesMap = new Map();
+
+    if (uniqueNonAdminUserIds.length > 0) {
+      const { data: profiles, error: profilesError } = await supabaseAdmin
+        .from('user_profiles')
+        .select('id, first_name, mobile_number')
+        .in('id', uniqueNonAdminUserIds);
+
+      if (profilesError) {
+        console.error('Edge Function: Error fetching user profiles:', profilesError);
+        // Log the error but don't fail the entire request; proceed without profile data
+      } else {
+        profiles.forEach((profile: any) => {
+          userProfilesMap.set(profile.id, profile);
+        });
+      }
+    }
+
     const url = new URL(req.url);
     const format = url.searchParams.get('format');
 
     // Format users for both JSON and CSV output
     const formattedUsers = nonAdminUsers.map((u: any, index: number) => {
-      const userMetadata = u.user_metadata || {};
+      const userProfile = userProfilesMap.get(u.id); // Get profile data
       const isBlocked = u.banned_until && new Date(u.banned_until) > new Date();
       return {
         slNo: index + 1, // Serial number for the full list
         id: u.id,
-        name: userMetadata.first_name || 'N/A',
-        mobileNumber: userMetadata.mobile_number || 'N/A',
+        name: userProfile?.first_name || u.user_metadata?.first_name || 'N/A', // Prioritize profile, then metadata
+        mobileNumber: userProfile?.mobile_number || u.user_metadata?.mobile_number || 'N/A', // Prioritize profile, then metadata
         email: u.email || 'N/A',
         accountCreated: new Date(u.created_at).toLocaleDateString(),
         plan: 'N/A', // Placeholder, as subscription data is not fetched here
