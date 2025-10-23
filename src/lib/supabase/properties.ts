@@ -117,3 +117,67 @@ export async function fetchUserProperties(userId: string): Promise<Property[]> {
     property_images: property.property_images.sort((a, b) => a.order_index - b.order_index),
   }));
 }
+
+interface FilteredPropertiesParams {
+  transactionType?: 'For Sale' | 'For Rent';
+  district?: string;
+  query?: string; // For searching title, locality, description
+  propertyType?: string; // For filtering by property type
+}
+
+export async function fetchFilteredProperties({
+  transactionType,
+  district,
+  query,
+  propertyType,
+}: FilteredPropertiesParams): Promise<Property[]> {
+  let queryBuilder = supabase
+    .from('properties')
+    .select(`
+      id,
+      title,
+      description,
+      price,
+      district,
+      locality,
+      property_type,
+      transaction_type,
+      created_at,
+      status,
+      property_images(image_url, order_index)
+    `)
+    .eq('status', 'approved'); // Always filter for approved properties
+
+  if (transactionType) {
+    queryBuilder = queryBuilder.eq('transaction_type', transactionType);
+  }
+  if (district) {
+    queryBuilder = queryBuilder.eq('district', district);
+  }
+  if (propertyType) {
+    queryBuilder = queryBuilder.eq('property_type', propertyType);
+  }
+  if (query) {
+    // Use ilike for case-insensitive search across multiple fields
+    queryBuilder = queryBuilder.or(
+      `title.ilike.%${query}%,locality.ilike.%${query}%,description.ilike.%${query}%`
+    );
+  }
+
+  queryBuilder = queryBuilder.order('created_at', { ascending: false });
+
+  const { data, error } = await queryBuilder;
+
+  if (error) {
+    console.error('Error fetching filtered properties:', error);
+    throw new Error('Failed to fetch filtered properties.');
+  }
+
+  return data.map(property => ({
+    ...property,
+    property_type: property.property_type,
+    transaction_type: property.transaction_type as 'For Sale' | 'For Rent',
+    status: property.status as 'pending' | 'approved' | 'rejected',
+    property_images: property.property_images.sort((a, b) => a.order_index - b.order_index),
+  }));
+}

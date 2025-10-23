@@ -7,6 +7,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Search } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { SearchInputWithIcons } from './SearchInputWithIcons';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate
 
 type TransactionType = 'buy' | 'rent';
 
@@ -20,14 +21,18 @@ export function HeroSection() {
   const [transactionType, setTransactionType] = useState<TransactionType>('buy');
   const [selectedDistrict, setSelectedDistrict] = useState<string>('');
   const [searchQuery, setSearchQuery] = useState<string>('');
+  const navigate = useNavigate(); // Initialize useNavigate
 
   const handleSearch = () => {
-    console.log({
-      transactionType,
-      selectedDistrict,
-      searchQuery,
-    });
-    // Implement actual search logic here later
+    const params = new URLSearchParams();
+    params.append('transactionType', transactionType === 'buy' ? 'For Sale' : 'For Rent');
+    if (selectedDistrict) {
+      params.append('district', selectedDistrict);
+    }
+    if (searchQuery) {
+      params.append('query', searchQuery);
+    }
+    navigate(`/properties?${params.toString()}`);
   };
 
   return (
