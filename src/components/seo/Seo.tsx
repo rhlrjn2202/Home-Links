@@ -1,6 +1,5 @@
 "use client";
 
-import React from 'react';
 import { Helmet } from 'react-helmet-async';
 
 interface SeoProps {
@@ -13,6 +12,7 @@ interface SeoProps {
   twitterCard?: string;
   twitterCreator?: string;
   twitterSite?: string;
+  twitterImage?: string; // Added twitterImage prop
 }
 
 export function Seo({
@@ -25,6 +25,7 @@ export function Seo({
   twitterCard = "summary_large_image",
   twitterCreator,
   twitterSite,
+  twitterImage, // Destructure twitterImage
 }: SeoProps) {
   const defaultOgUrl = typeof window !== 'undefined' ? window.location.href : 'https://homelinks.com'; // Replace with your actual domain
 
@@ -45,7 +46,7 @@ export function Seo({
       <meta property="twitter:url" content={ogUrl || defaultOgUrl} />
       <meta property="twitter:title" content={ogTitle || title} />
       <meta property="twitter:description" content={ogDescription || description} />
-      {twitterImage && <meta property="twitter:image" content={twitterImage} />}
+      {(twitterImage || ogImage) && <meta property="twitter:image" content={twitterImage || ogImage} />} {/* Use twitterImage or fallback to ogImage */}
       {twitterCreator && <meta name="twitter:creator" content={twitterCreator} />}
       {twitterSite && <meta name="twitter:site" content={twitterSite} />}
     </Helmet>
