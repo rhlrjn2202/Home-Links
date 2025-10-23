@@ -1,15 +1,12 @@
 import { Auth } from '@supabase/auth-ui-react';
 import { ThemeSupa } from '@supabase/auth-ui-shared';
 import { supabase } from '@/integrations/supabase/client';
-import { Seo } from '@/components/seo/Seo'; // Import Seo component
+// Removed: import { Seo } from '@/components/seo/Seo';
 
 export function AdminLoginPage() {
   return (
     <div className="flex justify-center items-center min-h-[calc(100vh-140px)] p-4">
-      <Seo
-        title="Admin Login - Home Links"
-        description="Admin login page for Home Links property management platform."
-      />
+      {/* Removed: <Seo title="Admin Login - Home Links" description="Admin login page for Home Links property management platform." /> */}
       <div className="w-full max-w-md">
         <h2 className="text-2xl font-bold text-center mb-6">Admin Login</h2>
         <Auth
