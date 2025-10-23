@@ -24,6 +24,7 @@ import {
 import { fetchUserProperties, Property } from '@/lib/supabase/properties'; // Import Property interface and fetchUserProperties
 import { Badge } from '@/components/ui/badge'; // Import Badge component
 import { formatPriceInINR } from '@/lib/formatters'; // Import formatter
+import { Seo } from '@/components/seo/Seo'; // Import Seo component
 
 interface UserProfile {
   first_name: string;
@@ -147,6 +148,10 @@ export function UserProfilePage() {
 
   return (
     <div className="container mx-auto p-4 md:p-8 flex flex-col lg:flex-row gap-8">
+      <Seo
+        title={`${profileTitle} | Home Links`}
+        description={`Manage your profile and view your submitted properties on Home Links. Email: ${profile.email}, Mobile: ${profile.mobile_number}.`}
+      />
       {/* User Profile Card */}
       <Card className="w-full lg:w-1/3 max-w-md lg:max-w-none mx-auto lg:mx-0">
         <CardHeader>

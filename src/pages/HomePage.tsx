@@ -9,6 +9,7 @@ import { fetchPublicProperties, type Property } from '@/lib/supabase/properties'
 import { PropertyCardProps } from '@/components/properties/PropertyCard';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { Seo } from '@/components/seo/Seo'; // Import Seo component
 
 export function HomePage() {
   const [propertiesByDistrict, setPropertiesByDistrict] = useState<Record<string, PropertyCardProps[]>>({});
@@ -52,6 +53,10 @@ export function HomePage() {
 
   return (
     <>
+      <Seo
+        title="Home Links - Find Your Dream Home in Kerala"
+        description="Explore properties for sale and rent across all districts of Kerala. Find apartments, houses, and land with ease."
+      />
       <HeroSection />
       <PropertyCategories />
       <TopPickedProperties />

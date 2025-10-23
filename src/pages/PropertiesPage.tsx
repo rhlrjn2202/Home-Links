@@ -8,6 +8,7 @@ import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Card, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Seo } from '@/components/seo/Seo'; // Import Seo component
 
 export function PropertiesPage() {
   const [searchParams] = useSearchParams();
@@ -83,6 +84,10 @@ export function PropertiesPage() {
 
   return (
     <div className="container mx-auto p-4 md:p-8">
+      <Seo
+        title={getPageTitle()}
+        description={getPageDescription()}
+      />
       <Card className="w-full shadow-lg mb-8">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl md:text-4xl font-bold">{getPageTitle()}</CardTitle>

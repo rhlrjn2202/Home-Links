@@ -5,14 +5,17 @@ import { App } from './App';
 import './index.css'; // Import the global CSS
 import { Toaster } from '@/components/ui/sonner';
 import { SessionContextProvider } from '@/components/auth/SessionContextProvider';
+import { SeoProvider } from '@/components/seo/SeoProvider'; // Import SeoProvider
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
-    <Router> {/* BrowserRouter moved here */}
-      <SessionContextProvider>
-        <App />
-      </SessionContextProvider>
-    </Router>
+    <SeoProvider> {/* Wrap with SeoProvider */}
+      <Router> {/* BrowserRouter moved here */}
+        <SessionContextProvider>
+          <App />
+        </SessionContextProvider>
+      </Router>
+    </SeoProvider>
     <Toaster />
   </React.StrictMode>,
 );

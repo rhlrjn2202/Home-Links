@@ -25,6 +25,7 @@ import { cn } from '@/lib/utils';
 import { PropertyImageUpload } from '@/components/properties/PropertyImageUpload'; // Import the new component
 import { useSession } from '@/components/auth/SessionContextProvider'; // Import useSession
 import { supabase } from '@/integrations/supabase/client'; // Import supabase client
+import { Seo } from '@/components/seo/Seo'; // Import Seo component
 
 const KERALA_DISTRICTS = [
   "Alappuzha", "Ernakulam", "Idukku", "Kannur", "Kasaragod", "Kollam",
@@ -150,6 +151,10 @@ export function SubmitPropertyPage() {
 
   return (
     <div className="container mx-auto p-4 md:p-8">
+      <Seo
+        title="Submit Your Property - Home Links"
+        description="List your property for sale or rent on Home Links and reach thousands of potential buyers and tenants in Kerala."
+      />
       <Card className="w-full max-w-3xl mx-auto">
         <CardHeader className="text-center">
           <CardTitle className="text-3xl font-bold">Submit Your Property</CardTitle>

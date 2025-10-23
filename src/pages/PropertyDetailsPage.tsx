@@ -10,6 +10,7 @@ import { Loader2, MapPin, Tag, Home, DollarSign, Calendar, Phone, Mail } from 'l
 import { toast } from 'sonner';
 import { Separator } from '@/components/ui/separator';
 import { formatPriceInINR, formatDateToIST } from '@/lib/formatters'; // Import formatters
+import { Seo } from '@/components/seo/Seo'; // Import Seo component
 
 export function PropertyDetailsPage() {
   const { id } = useParams<{ id: string }>();
@@ -73,9 +74,20 @@ export function PropertyDetailsPage() {
   }
 
   const formattedDate = formatDateToIST(property.created_at);
+  const pageTitle = `${property.title} - ${property.locality}, ${property.district} | Home Links`;
+  const pageDescription = `View details for ${property.title}, a ${property.property_type} ${property.transaction_type.toLowerCase()} in ${property.locality}, ${property.district}. Price: ${formatPriceInINR(property.price)}. ${property.description.substring(0, 150)}...`;
+  const ogImage = property.property_images?.[0]?.image_url;
 
   return (
     <div className="container mx-auto p-4 md:p-8">
+      <Seo
+        title={pageTitle}
+        description={pageDescription}
+        ogTitle={pageTitle}
+        ogDescription={pageDescription}
+        ogImage={ogImage}
+        ogUrl={typeof window !== 'undefined' ? window.location.href : undefined}
+      />
       <Card className="w-full max-w-5xl mx-auto shadow-lg">
         <CardHeader className="pb-4">
           <CardTitle className="text-4xl font-bold text-primary-foreground bg-primary p-4 rounded-t-lg -mx-6 -mt-6 md:-mx-8 md:-mt-8">
